@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Download, Calendar, Package, HardDrive, Crown, ArrowLeft, ChevronRight, Zap, Info, Server, Star } from "lucide-react"
-import { App } from "@/types"
+import { App, Category } from "@/types"
 import { formatDate } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { AppCard } from "@/components/ui/AppCard"
@@ -21,6 +21,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
   const [isVip, setIsVip] = useState(false)
   const [showVipModal, setShowVipModal] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
+  const [category, setCategory] = useState<Category | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -32,7 +33,16 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         setIsVip(data?.is_vip || false)
       }
     }
+
+    const getCategory = async () => {
+      if (app.category_id) {
+        const { data } = await supabase.from("categories").select("*").eq("id", app.category_id).single()
+        setCategory(data)
+      }
+    }
+
     getUser()
+    getCategory()
   }, [])
 
   const handleDownload = async () => {
@@ -99,17 +109,17 @@ export function AppDetailClient({ app, relatedApps }: Props) {
             )}
           </div>
 
-          {/* Info di sebelah kanan icon */}
+          {/* Info */}
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-black truncate">{app.name}</h1>
 
             {/* Version • Kategori */}
             <div className="flex items-center gap-2 text-sm font-bold mt-1">
               <span className="text-neo-cyan dark:text-neo-purple">v{app.version}</span>
-              {app.category && (
+              {category && (
                 <>
                   <span className="text-gray-400">•</span>
-                  <span className="text-gray-500 dark:text-gray-400 truncate">{app.category}</span>
+                  <span className="text-gray-500 dark:text-gray-400 truncate">{category.name}</span>
                 </>
               )}
             </div>
@@ -333,4 +343,4 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-      }
+}
