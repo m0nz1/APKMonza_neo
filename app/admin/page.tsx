@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Package, Users, Tags, ArrowLeft, Shield,
   Plus, Pencil, Trash2, Search, Crown, UserCheck, UserX,
   Image as ImageIcon, BarChart3, TrendingUp,
-  Download, X
+  Download, X, AlertTriangle
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { App } from "@/types"
@@ -172,7 +172,7 @@ function DashboardTab() {
 
       const { data: recent } = await supabase
         .from("downloads")
-        .select("*, users(username), apps(name)")
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(10)
 
@@ -222,7 +222,6 @@ function DashboardTab() {
           <table className="w-full">
             <thead>
               <tr className="border-b-2 border-neo-black">
-                <th className="text-left py-2 text-xs font-black">User</th>
                 <th className="text-left py-2 text-xs font-black">App</th>
                 <th className="text-left py-2 text-xs font-black">Date</th>
                 <th className="text-left py-2 text-xs font-black">Type</th>
@@ -231,7 +230,6 @@ function DashboardTab() {
             <tbody>
               {recentDownloads.map((dl) => (
                 <tr key={dl.id} className="border-b border-gray-200 dark:border-gray-700">
-                  <td className="py-2 text-sm">{dl.users?.username || "-"}</td>
                   <td className="py-2 text-sm font-bold">{dl.app_name}</td>
                   <td className="py-2 text-xs text-gray-500">{formatDate(dl.created_at)}</td>
                   <td className="py-2">
@@ -255,7 +253,6 @@ function DashboardTab() {
 function AppsTab() {
   const [apps, setApps] = useState<App[]>([])
   const [categories, setCategories] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingApp, setEditingApp] = useState<App | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -275,9 +272,12 @@ function AppsTab() {
   }, [])
 
   const fetchApps = async () => {
-    const { data } = await supabase.from("apps").select("*").order("created_at", { ascending: false })
+    const { data, error } = await supabase.from("apps").select("*").order("created_at", { ascending: false })
+    if (error) {
+      toast.error("Gagal load apps: " + error.message)
+      return
+    }
     setApps(data || [])
-    setLoading(false)
   }
 
   const fetchCategories = async () => {
@@ -288,13 +288,22 @@ function AppsTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const slug = formData.slug || generateSlug(formData.name || "")
-    const data = { ...formData, slug }
+    const dataToSend = { ...formData, slug }
 
     if (editingApp) {
-      await supabase.from("apps").update(data).eq("id", editingApp.id)
+      const { error } = await supabase.from("apps").update(dataToSend).eq("id", editingApp.id)
+      if (error) {
+        toast.error("Gagal update: " + error.message)
+        return
+      }
       toast.success("App updated!")
     } else {
-      await supabase.from("apps").insert(data)
+      const { error } = await supabase.from("apps").insert(dataToSend)
+      if (error) {
+        toast.error("Gagal create: " + error.message)
+        console.error("Insert error:", error)
+        return
+      }
       toast.success("App created!")
     }
 
@@ -306,7 +315,11 @@ function AppsTab() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Yakin ingin menghapus app ini?")) return
-    await supabase.from("apps").delete().eq("id", id)
+    const { error } = await supabase.from("apps").delete().eq("id", id)
+    if (error) {
+      toast.error("Gagal hapus: " + error.message)
+      return
+    }
     toast.success("App deleted!")
     fetchApps()
   }
@@ -375,7 +388,6 @@ function AppsTab() {
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
           <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }}
@@ -423,22 +435,35 @@ function UsersTab() {
   useEffect(() => { fetchUsers() }, [])
 
   const fetchUsers = async () => {
-    const { data } = await supabase.from("users").select("*").order("created_at", { ascending: false })
+    const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
+    if (error) {
+      toast.error("Gagal load users: " + error.message)
+      return
+    }
     setUsers(data || [])
   }
 
   const toggleVip = async (id: string, currentStatus: boolean) => {
-    await supabase.from("users").update({
+    const { error } = await supabase.from("users").update({
       is_vip: !currentStatus,
       vip_expires_at: !currentStatus ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : null
     }).eq("id", id)
+
+    if (error) {
+      toast.error("Gagal toggle VIP: " + error.message)
+      return
+    }
     toast.success(`VIP ${!currentStatus ? "activated" : "deactivated"}!`)
     fetchUsers()
   }
 
   const toggleAdmin = async (id: string, currentRole: string) => {
     const newRole = currentRole === "admin" ? "user" : "admin"
-    await supabase.from("users").update({ role: newRole }).eq("id", id)
+    const { error } = await supabase.from("users").update({ role: newRole }).eq("id", id)
+    if (error) {
+      toast.error("Gagal toggle admin: " + error.message)
+      return
+    }
     toast.success(`Role updated to ${newRole}!`)
     fetchUsers()
   }
@@ -529,17 +554,33 @@ function CategoriesTab() {
   useEffect(() => { fetchCategories() }, [])
 
   const fetchCategories = async () => {
-    const { data } = await supabase.from("categories").select("*").order("name")
+    const { data, error } = await supabase.from("categories").select("*").order("name")
+    if (error) {
+      toast.error("Gagal load categories: " + error.message)
+      return
+    }
     setCategories(data || [])
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (editingCat) {
-      await supabase.from("categories").update(formData).eq("id", editingCat.id)
+      const { error } = await supabase.from("categories").update(formData).eq("id", editingCat.id)
+      if (error) {
+        toast.error("Gagal update: " + error.message)
+        return
+      }
       toast.success("Category updated!")
     } else {
-      await supabase.from("categories").insert({ ...formData, slug: formData.name.toLowerCase().replace(/\s+/g, "-") })
+      const { error } = await supabase.from("categories").insert({
+        ...formData,
+        slug: formData.name.toLowerCase().replace(/\s+/g, "-")
+      })
+      if (error) {
+        toast.error("Gagal create: " + error.message)
+        console.error("Insert error:", error)
+        return
+      }
       toast.success("Category created!")
     }
     setShowModal(false); setEditingCat(null); setFormData({ name: "", slug: "", icon: "", color: "#06b6d4" })
@@ -548,7 +589,11 @@ function CategoriesTab() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Yakin ingin menghapus kategori ini?")) return
-    await supabase.from("categories").delete().eq("id", id)
+    const { error } = await supabase.from("categories").delete().eq("id", id)
+    if (error) {
+      toast.error("Gagal hapus: " + error.message)
+      return
+    }
     toast.success("Category deleted!")
     fetchCategories()
   }

@@ -1,6 +1,4 @@
 import { notFound } from "next/navigation"
-import { Navbar } from "@/components/layout/Navbar"
-import { BottomNav } from "@/components/layout/BottomNav"
 import { createClient } from "@/lib/supabase/server"
 import { App } from "@/types"
 import { Metadata } from "next"
@@ -47,10 +45,8 @@ export default async function AppDetailPage({ params }: Props) {
   const relatedApps = await getRelatedApps(app.category_id, app.id)
 
   return (
-    <div className="min-h-screen bg-neo-gray-light dark:bg-neo-black pb-24 md:pb-0">
-      <Navbar />
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       <AppDetailClient app={app} relatedApps={relatedApps} />
-      <BottomNav />
-    </div>
+    </main>
   )
 }
