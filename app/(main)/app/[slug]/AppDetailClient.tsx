@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Download, Share2, Calendar, Package, HardDrive, Crown, ArrowLeft, ChevronRight, Zap, Info, Server, Star } from "lucide-react"
+import { Download, Calendar, Package, HardDrive, Crown, ArrowLeft, ChevronRight, Zap, Info, Server, Star } from "lucide-react"
 import { App } from "@/types"
 import { formatDate } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
@@ -40,33 +40,44 @@ export function AppDetailClient({ app, relatedApps }: Props) {
       toast.error("Silakan login terlebih dahulu")
       return
     }
-
-    const downloadUrl = isVip && app.vip_url ? app.vip_url : app.free_url
-
+    const downloadUrl = app.free_url
     if (!downloadUrl) {
       toast.error("Link download tidak tersedia")
       return
     }
-
-    if (app.vip_url && !isVip) {
-      setShowVipModal(true)
-      return
-    }
-
     await supabase.from("downloads").insert({
       user_id: user.id,
       app_id: app.id,
       app_name: app.name,
       download_url: downloadUrl,
-      is_vip: isVip,
+      is_vip: false,
     })
-
     window.open(downloadUrl, "_blank")
     toast.success("Download dimulai!")
   }
 
+  const handleVipDownload = async () => {
+    if (!user) {
+      toast.error("Silakan login terlebih dahulu")
+      return
+    }
+    if (!isVip) {
+      setShowVipModal(true)
+      return
+    }
+    await supabase.from("downloads").insert({
+      user_id: user.id,
+      app_id: app.id,
+      app_name: app.name,
+      download_url: app.vip_url,
+      is_vip: true,
+    })
+    window.open(app.vip_url!, "_blank")
+    toast.success("Download VIP dimulai!")
+  }
+
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <main className="w-full max-w-2xl mx-auto px-4 py-6 space-y-4">
       {/* Back Button */}
       <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold hover:text-neo-cyan dark:hover:text-neo-purple transition-colors">
         <ArrowLeft className="w-4 h-4" /> Kembali
@@ -76,49 +87,44 @@ export function AppDetailClient({ app, relatedApps }: Props) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="neo-card bg-white dark:bg-neo-gray-dark p-6"
+        className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
       >
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex items-center gap-4">
           {/* Icon */}
-          <div className="flex-shrink-0 mx-auto md:mx-0">
-            <div className="w-28 h-28 bg-neo-cyan/20 dark:bg-neo-purple/20 border-3 border-neo-black rounded-2xl flex items-center justify-center overflow-hidden shadow-neo">
-              {app.icon_url ? (
-                <Image src={app.icon_url} alt={app.name} width={112} height={112} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-4xl font-bold text-neo-cyan dark:text-neo-purple">{app.name.charAt(0)}</span>
-              )}
-            </div>
-          </div>
-
-          {/* Info */}
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-black mb-1">{app.name}</h1>
-            <p className="text-neo-cyan dark:text-neo-purple font-bold mb-2">v{app.version}</p>
-            <p className="text-gray-600 dark:text-gray-400 font-medium mb-3">{app.developer}</p>
-
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
-              <span className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-neo-yellow text-neo-yellow" />
-                <span className="font-bold text-neo-black dark:text-white">{app.rating || "4.5"}</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <Download className="w-4 h-4" />
-                <span className="font-bold text-neo-black dark:text-white">{(app.download_count || 0).toLocaleString()}</span>
-              </span>
-            </div>
-
-            {app.mod_feature_full && (
-              <div className="inline-block neo-badge bg-neo-yellow text-neo-black mb-4">
-                {app.mod_feature_full}
-              </div>
+          <div className="flex-shrink-0 w-24 h-24 bg-neo-cyan/20 dark:bg-neo-purple/20 border-3 border-neo-black rounded-2xl flex items-center justify-center overflow-hidden shadow-neo">
+            {app.icon_url ? (
+              <Image src={app.icon_url} alt={app.name} width={96} height={96} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-3xl font-bold text-neo-cyan dark:text-neo-purple">{app.name.charAt(0)}</span>
             )}
           </div>
 
-          {/* Share Button */}
-          <div className="flex flex-col gap-3 md:min-w-[200px]">
-            <button className="neo-button px-4 py-2 bg-white dark:bg-neo-gray-dark text-sm flex items-center justify-center gap-2">
-              <Share2 className="w-4 h-4" /> Share
-            </button>
+          {/* Info di sebelah kanan icon */}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-black truncate">{app.name}</h1>
+
+            {/* Version • Kategori */}
+            <div className="flex items-center gap-2 text-sm font-bold mt-1">
+              <span className="text-neo-cyan dark:text-neo-purple">v{app.version}</span>
+              {app.category && (
+                <>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-500 dark:text-gray-400 truncate">{app.category}</span>
+                </>
+              )}
+            </div>
+
+            {/* Rating & Download */}
+            <div className="flex items-center gap-4 mt-2 text-sm">
+              <span className="flex items-center gap-1">
+                <Star className="w-4 h-4 fill-neo-yellow text-neo-yellow" />
+                <span className="font-bold">{app.rating || "4.5"}</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <Download className="w-4 h-4 text-gray-400" />
+                <span className="font-bold">{(app.download_count || 0).toLocaleString()}</span>
+              </span>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -129,7 +135,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="neo-card bg-white dark:bg-neo-gray-dark p-6"
+          className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
         >
           <h2 className="text-xl font-black mb-4">Screenshots</h2>
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
@@ -154,7 +160,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="neo-card bg-white dark:bg-neo-gray-dark p-6"
+          className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
         >
           <h2 className="text-xl font-black mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
@@ -163,7 +169,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           <div className="space-y-2">
             {app.mod_feature_full.split("\n").map((feature, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="mt-1 w-2 h-2 rounded-full bg-neo-cyan dark:bg-neo-purple flex-shrink-0" />
+                <span className="mt-1.5 w-2 h-2 rounded-full bg-neo-cyan dark:bg-neo-purple flex-shrink-0" />
                 <p className="text-gray-700 dark:text-gray-300 font-medium">{feature}</p>
               </div>
             ))}
@@ -171,20 +177,18 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         </motion.div>
       )}
 
-      {/* 4. Description */}
+      {/* 4. Deskripsi */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="neo-card bg-white dark:bg-neo-gray-dark p-6"
+        className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Info className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
           Deskripsi
         </h2>
-        <div className="prose dark:prose-invert max-w-none">
-          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">{app.description}</p>
-        </div>
+        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{app.description}</p>
       </motion.div>
 
       {/* 5. Tech Specs */}
@@ -192,13 +196,13 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="neo-card bg-white dark:bg-neo-gray-dark p-6"
+        className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Server className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
           Tech Specs
         </h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
           <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size} />
           <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name} />
@@ -211,13 +215,14 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="neo-card bg-white dark:bg-neo-gray-dark p-6"
+        className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Download className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
           Link Download
         </h2>
         <div className="space-y-3">
+          {/* Tombol Free */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={handleDownload}
@@ -227,15 +232,32 @@ export function AppDetailClient({ app, relatedApps }: Props) {
             Download APK {app.size && `(${app.size})`}
           </motion.button>
 
+          {/* Tombol VIP */}
           {app.vip_url && (
-            <div className="flex items-center gap-2 p-3 border-2 border-neo-black rounded-lg bg-neo-yellow/10">
-              <Crown className="w-4 h-4 text-neo-yellow flex-shrink-0" />
-              <p className="text-sm font-bold">
-                User <span className="text-neo-yellow">VIP</span> mendapat link download langsung tanpa redirect
-              </p>
-            </div>
+            <>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleVipDownload}
+                className={`w-full neo-button px-6 py-4 font-black text-lg flex items-center justify-center gap-2 ${
+                  isVip
+                    ? "bg-neo-yellow text-neo-black"
+                    : "bg-neo-yellow/30 text-neo-black border-dashed"
+                }`}
+              >
+                <Crown className="w-5 h-5" />
+                {isVip ? "Download VIP (Direct)" : "Download VIP 🔒"}
+              </motion.button>
+
+              <div className="flex items-center gap-2 p-3 border-2 border-neo-black rounded-lg bg-neo-yellow/10">
+                <Crown className="w-4 h-4 text-neo-yellow flex-shrink-0" />
+                <p className="text-sm font-bold">
+                  User <span className="text-neo-yellow">VIP</span> mendapat link download langsung tanpa redirect
+                </p>
+              </div>
+            </>
           )}
 
+          {/* Login CTA */}
           {!user && (
             <Link
               href="/auth/login"
@@ -253,9 +275,10 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
+          className="w-full"
         >
           <h2 className="text-xl font-black mb-4">Aplikasi Serupa</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {relatedApps.map((relatedApp, i) => (
               <AppCard key={relatedApp.id} app={relatedApp} index={i} />
             ))}
@@ -304,10 +327,10 @@ export function AppDetailClient({ app, relatedApps }: Props) {
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="p-3 border-2 border-neo-black rounded-lg bg-neo-gray-light dark:bg-neo-gray-dark">
+    <div className="w-full p-3 border-2 border-neo-black rounded-lg bg-neo-gray-light dark:bg-neo-gray-dark">
       <div className="text-neo-cyan dark:text-neo-purple mb-1">{icon}</div>
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-            }
+      }
