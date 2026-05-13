@@ -87,9 +87,9 @@ export function AppDetailClient({ app, relatedApps }: Props) {
   }
 
   return (
-    <main className="w-full px-4 pt-6 pb-6 space-y-4">
+    <main className="w-full max-w-2xl mx-auto py-6 space-y-4">
       {/* Back Button */}
-      <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold hover:text-neo-cyan dark:hover:text-neo-purple transition-colors">
+      <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold hover:text-neo-cyan dark:hover:text-neo-purple transition-colors mx-4">
         <ArrowLeft className="w-4 h-4" /> Kembali
       </Link>
 
@@ -97,7 +97,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
+        className="mx-4 neo-card bg-white dark:bg-neo-gray-dark p-6"
       >
         <div className="flex items-center gap-4">
           {/* Icon */}
@@ -145,7 +145,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
+          className="mx-4 neo-card bg-white dark:bg-neo-gray-dark p-6"
         >
           <h2 className="text-xl font-black mb-4">Screenshots</h2>
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
@@ -170,7 +170,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
+          className="mx-4 neo-card bg-white dark:bg-neo-gray-dark p-6"
         >
           <h2 className="text-xl font-black mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
@@ -192,7 +192,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
+        className="mx-4 neo-card bg-white dark:bg-neo-gray-dark p-6"
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Info className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
@@ -206,13 +206,13 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
+        className="mx-4 neo-card bg-white dark:bg-neo-gray-dark p-6"
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Server className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
           Tech Specs
         </h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
           <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size} />
           <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name} />
@@ -225,7 +225,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="w-full neo-card bg-white dark:bg-neo-gray-dark p-6"
+        className="mx-4 neo-card bg-white dark:bg-neo-gray-dark p-6"
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Download className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
@@ -285,7 +285,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="w-full"
+          className="mx-4"
         >
           <h2 className="text-xl font-black mb-4">Aplikasi Serupa</h2>
           <div className="grid grid-cols-1 gap-4">
@@ -337,11 +337,10 @@ export function AppDetailClient({ app, relatedApps }: Props) {
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="w-full p-4 border-2 border-neo-black rounded-lg bg-neo-gray-light dark:bg-neo-gray-dark">
+    <div className="w-full p-3 border-2 border-neo-black rounded-lg bg-neo-gray-light dark:bg-neo-gray-dark">
       <div className="text-neo-cyan dark:text-neo-purple mb-1">{icon}</div>
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-      }
-        
+}
