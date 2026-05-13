@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const { table, operation, data, id, filter } = await request.json()
     const supabase = createAdminClient()
 
-    let result
+    let result: { data: any; error: any } = { data: null, error: null }
 
     switch (operation) {
       case "insert":
@@ -19,13 +19,13 @@ export async function POST(request: NextRequest) {
         result = await supabase.from(table).delete().eq("id", id).select()
         break
       case "select":
-        result = await supabase.from(table).select(data || "*")
+        let query = supabase.from(table).select(data || "*")
         if (filter) {
           Object.entries(filter).forEach(([key, value]) => {
-            result = result.eq(key, value)
+            query = query.eq(key, value)
           })
         }
-        result = await result
+        result = await query
         break
       default:
         return NextResponse.json({ error: "Invalid operation" }, { status: 400 })

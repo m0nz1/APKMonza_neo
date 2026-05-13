@@ -114,4 +114,4 @@ VALUES (
 ON CONFLICT (slug) DO NOTHING;
 
 -- 6. JADIKAN USER PERTAMA JADI ADMIN (ganti email sesuai akun kamu)
--- UPDATE users SET role = 'admin' WHERE email = 'email-kamu@gmail.com';
+-- UPDATE users SET role = 'admin' WHERE email = 'axehuyyy@gmail.com';
