@@ -1,4 +1,4 @@
-"use client"
+use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -207,6 +207,7 @@ function AppsTab() {
     mod_feature: "", mod_feature_full: "", description: "",
     package_name: "", size: "", free_url: "", vip_url: "",
     category_id: "", icon_url: "", screenshots: [], is_recommended: false,
+    rating: 4.5, download_count: 0,
   }
   const [formData, setFormData] = useState<Partial<App>>(emptyApp)
 
@@ -328,6 +329,36 @@ function AppsTab() {
                 <div><label className="block font-bold text-sm mb-1">Package Name</label><input value={formData.package_name || ""} onChange={(e) => setFormData({ ...formData, package_name: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="com.example.app" /></div>
                 <div><label className="block font-bold text-sm mb-1">Size</label><input value={formData.size || ""} onChange={(e) => setFormData({ ...formData, size: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="50 MB" /></div>
                 <div><label className="block font-bold text-sm mb-1">Icon URL</label><input value={formData.icon_url || ""} onChange={(e) => setFormData({ ...formData, icon_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
+                {/* ===== RATING & DOWNLOAD COUNT ===== */}
+                <div>
+                  <label className="block font-bold text-sm mb-1 flex items-center gap-1">
+                    <Star className="w-3 h-3 text-neo-yellow fill-neo-yellow" /> Rating
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="5"
+                    value={formData.rating ?? 4.5}
+                    onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
+                    className="neo-input w-full px-3 py-2"
+                    placeholder="4.5"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-sm mb-1 flex items-center gap-1">
+                    <Download className="w-3 h-3 text-neo-cyan" /> Download Count
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.download_count ?? 0}
+                    onChange={(e) => setFormData({ ...formData, download_count: parseInt(e.target.value) })}
+                    className="neo-input w-full px-3 py-2"
+                    placeholder="0"
+                  />
+                </div>
+                                {/* ===== END ===== */}
               </div>
               <div><label className="block font-bold text-sm mb-1">Mod Feature (Short)</label><input value={formData.mod_feature || ""} onChange={(e) => setFormData({ ...formData, mod_feature: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Unlimited Money" /></div>
               <div><label className="block font-bold text-sm mb-1">Mod Feature (Full)</label><input value={formData.mod_feature_full || ""} onChange={(e) => setFormData({ ...formData, mod_feature_full: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Full mod description" /></div>
@@ -478,4 +509,5 @@ function CategoriesTab() {
       )}
     </div>
   )
-}
+                      }
+            
