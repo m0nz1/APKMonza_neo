@@ -46,8 +46,8 @@ export function Navbar() {
               <Download className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-black tracking-tight">
-              <span className="text-neo-cyan dark:text-neo-purple">Neo</span>
-              <span className="text-neo-yellow">Store</span>
+              <span className="text-neo-cyan dark:text-neo-purple">APK</span>
+              <span className="text-neo-yellow">Monza</span>
             </span>
           </Link>
 
