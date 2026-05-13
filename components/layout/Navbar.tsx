@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
-import { Sun, Moon, Menu, X, Download, Crown } from "lucide-react"
+import { Sun, Moon, Menu, X, Package, Crown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
@@ -43,7 +43,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-neo-cyan dark:bg-neo-purple border-2 border-neo-black rounded-lg shadow-neo flex items-center justify-center">
-              <Download className="w-5 h-5 text-white" />
+              <Package className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-black tracking-tight">
               <span className="text-neo-cyan dark:text-neo-purple">APK</span>
