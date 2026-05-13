@@ -19,6 +19,12 @@ export const metadata: Metadata = {
     locale: "id_ID",
     siteName: "APKMonza",
   },
+  // TAMBAHKAN INI
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
+  },
 }
 
 export default function RootLayout({
