@@ -17,6 +17,7 @@ export interface App {
   category_id: string
   rating?: number
   download_count?: number
+  is_recommended?: boolean
   created_at?: string
 }
 
