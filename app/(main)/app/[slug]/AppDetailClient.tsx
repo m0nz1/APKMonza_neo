@@ -46,22 +46,23 @@ export function AppDetailClient({ app, relatedApps }: Props) {
   }, [])
 
   const handleDownload = async () => {
-    if (!user) {
-      toast.error("Silakan login terlebih dahulu")
-      return
-    }
     const downloadUrl = app.free_url
     if (!downloadUrl) {
       toast.error("Link download tidak tersedia")
       return
     }
-    await supabase.from("downloads").insert({
-      user_id: user.id,
-      app_id: app.id,
-      app_name: app.name,
-      download_url: downloadUrl,
-      is_vip: false,
-    })
+
+    // Kalau user login, catat ke history downloads
+    if (user) {
+      await supabase.from("downloads").insert({
+        user_id: user.id,
+        app_id: app.id,
+        app_name: app.name,
+        download_url: downloadUrl,
+        is_vip: false,
+      })
+    }
+
     window.open(downloadUrl, "_blank")
     toast.success("Download dimulai!")
   }
@@ -311,15 +312,13 @@ export function AppDetailClient({ app, relatedApps }: Props) {
               >
                 Nanti
               </button>
-              <button
-                onClick={() => {
-                  setShowVipModal(false)
-                  toast.info("Fitur upgrade VIP segera hadir!")
-                }}
+              <Link
+                href="/profile"
+                onClick={() => setShowVipModal(false)}
                 className="flex-1 neo-button px-4 py-3 bg-neo-yellow text-neo-black text-sm font-bold"
               >
                 Upgrade VIP
-              </button>
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -336,5 +335,5 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-                     }
+                    }
             
