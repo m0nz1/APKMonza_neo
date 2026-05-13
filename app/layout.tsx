@@ -19,11 +19,6 @@ export const metadata: Metadata = {
     locale: "id_ID",
     siteName: "APKMonza",
   },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    // apple dihapus — khusus Android/desktop
-  },
 }
 
 export default function RootLayout({
@@ -33,6 +28,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" suppressHydrationWarning>
+      <head>
+        {/* Favicon ICO only - tanpa PNG */}
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        
+        {/* Android theme color */}
+        <meta name="theme-color" content="#06b6d4" />
+        <meta name="msapplication-TileColor" content="#06b6d4" />
+      </head>
       <body className={inter.className}>
         <Providers>
           {children}
