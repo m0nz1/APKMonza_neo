@@ -8,16 +8,16 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: {
-    default: "NeoStore - Download APK & Game Mod",
-    template: "%s | NeoStore",
+    default: "APKMonza - APKVault",
+    template: "%s | APKMonza",
   },
   description: "Download aplikasi dan game mod terbaru dengan style Neo Brutalism modern. Aman, cepat, dan terpercaya.",
   keywords: ["apk download", "game mod", "android", "neo brutalism", "app store"],
-  authors: [{ name: "NeoStore" }],
+  authors: [{ name: "APKMonza" }],
   openGraph: {
     type: "website",
     locale: "id_ID",
-    siteName: "NeoStore",
+    siteName: "APKMonza",
   },
 }
 
