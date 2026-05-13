@@ -87,7 +87,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
   }
 
   return (
-    <main className="w-full max-w-2xl mx-auto px-4 py-6 space-y-4">
+    <main className="w-full max-w-2xl mx-auto px-4 pt-6 pb-28 space-y-4">
       {/* Back Button */}
       <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold hover:text-neo-cyan dark:hover:text-neo-purple transition-colors">
         <ArrowLeft className="w-4 h-4" /> Kembali
@@ -212,7 +212,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           <Server className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
           Tech Specs
         </h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
           <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size} />
           <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name} />
@@ -337,10 +337,11 @@ export function AppDetailClient({ app, relatedApps }: Props) {
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="w-full p-3 border-2 border-neo-black rounded-lg bg-neo-gray-light dark:bg-neo-gray-dark">
+    <div className="w-full p-4 border-2 border-neo-black rounded-lg bg-neo-gray-light dark:bg-neo-gray-dark">
       <div className="text-neo-cyan dark:text-neo-purple mb-1">{icon}</div>
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-}
+            }
+                
