@@ -87,7 +87,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
   }
 
   return (
-    <main className="w-full max-w-2xl mx-auto px-4 pt-6 pb-28 space-y-4">
+    <main className="w-full px-4 pt-6 pb-6 space-y-4">
       {/* Back Button */}
       <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold hover:text-neo-cyan dark:hover:text-neo-purple transition-colors">
         <ArrowLeft className="w-4 h-4" /> Kembali
@@ -343,5 +343,5 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-            }
-                
+      }
+        
