@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { User, Crown, Download, LogOut, Edit3, Calendar } from "lucide-react"
+import { User, Crown, Download, LogOut, Edit3, Calendar, ArrowUpRight } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { formatDate } from "@/lib/utils"
 import { toast } from "sonner"
+
+// Ganti nomor WhatsApp admin di sini
+const ADMIN_WA_NUMBER = "6289696089274"
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
@@ -153,14 +156,27 @@ export default function ProfilePage() {
                 </p>
               )}
 
-              <div className="flex gap-2">
-                <button 
+              <div className="flex flex-wrap gap-2 justify-center">
+                {/* Tombol Upgrade VIP — hanya muncul kalau belum VIP */}
+                {!profile?.is_vip && (
+                  <a
+                    href={`https://wa.me/${ADMIN_WA_NUMBER}?text=Halo%20admin%2C%20saya%20ingin%20upgrade%20akun%20saya%20ke%20VIP.%20Email%3A%20${encodeURIComponent(user?.email || "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="neo-button px-4 py-2 bg-neo-yellow text-neo-black text-sm font-bold flex items-center gap-2"
+                  >
+                    <Crown className="w-4 h-4" /> Upgrade ke VIP
+                    <ArrowUpRight className="w-3 h-3" />
+                  </a>
+                )}
+
+                <button
                   onClick={() => setIsEditing(true)}
                   className="neo-button px-4 py-2 bg-white dark:bg-neo-gray-dark text-sm flex items-center gap-2"
                 >
                   <Edit3 className="w-4 h-4" /> Edit Profile
                 </button>
-                <button 
+                <button
                   onClick={handleLogout}
                   className="neo-button px-4 py-2 bg-red-500 text-white text-sm flex items-center gap-2"
                 >
@@ -207,4 +223,4 @@ export default function ProfilePage() {
       </motion.div>
     </main>
   )
-}
+              }
