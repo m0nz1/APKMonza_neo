@@ -858,9 +858,10 @@ function MembershipTab() {
             <h2 className="text-xl font-black mb-4">{editingPlan.id ? "Edit" : "New"} Plan</h2>
             <div className="space-y-3">
               <input value={editingPlan.name || ""} onChange={e => setEditingPlan({...editingPlan, name: e.target.value})} placeholder="Name" className="neo-input w-full p-2" />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <input value={editingPlan.price || ""} onChange={e => setEditingPlan({...editingPlan, price: e.target.value})} placeholder="Price" className="neo-input w-full p-2" />
                 <input value={editingPlan.original_price || ""} onChange={e => setEditingPlan({...editingPlan, original_price: e.target.value || null})} placeholder="Original Price" className="neo-input w-full p-2" />
+                <input type="number" min="0" max="100" value={editingPlan.discount_percent || ""} onChange={e => setEditingPlan({...editingPlan, discount_percent: e.target.value ? parseInt(e.target.value) : null})} placeholder="Discount %" className="neo-input w-full p-2" />
               </div>
               <input value={editingPlan.period || ""} onChange={e => setEditingPlan({...editingPlan, period: e.target.value})} placeholder="Period" className="neo-input w-full p-2" />
               <input value={editingPlan.description || ""} onChange={e => setEditingPlan({...editingPlan, description: e.target.value})} placeholder="Description" className="neo-input w-full p-2" />
