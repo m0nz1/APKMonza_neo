@@ -280,8 +280,9 @@ export default function MembershipPage() {
               </div>
             </motion.div>
 
-            {plan.popular && !current && (
-              <div className={`absolute top-0 right-4 -translate-y-1/2 px-3 py-1 ${accent.bg} border-2 border-neo-black rounded-full z-10`}>
+        {plan.popular && !current && (
+  <div className={`absolute top-4 right-4 md:top-5 md:right-5 px-3 py-1 ${accent.bg} border-2 border-neo-black rounded-full z-10`}>
+
                 <span className={`text-xs font-black ${accent.text} flex items-center gap-1`}>
                   <Zap className="w-3 h-3" /> MOST POPULAR
                 </span>
