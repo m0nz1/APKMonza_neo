@@ -407,29 +407,87 @@ function UsersTab() {
     toast.success(`Role updated to ${newRole}!`); fetchUsers()
   }
 
-  const filtered = users.filter((u) => u.email?.toLowerCase().includes(searchQuery.toLowerCase()) || u.username?.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filtered = users.filter((u) => 
+    u.email?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-black flex items-center gap-2"><Users className="w-8 h-8 text-neo-cyan dark:text-neo-purple" /> Manage Users</h1>
+      <h1 className="text-2xl md:text-3xl font-black flex items-center gap-2">
+        <Users className="w-7 h-7 md:w-8 md:h-8 text-neo-cyan dark:text-neo-purple" /> 
+        Manage Users
+      </h1>
+      
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search users..." className="neo-input w-full pl-12 pr-4 py-3" />
+        <input 
+          type="text" 
+          value={searchQuery} 
+          onChange={(e) => setSearchQuery(e.target.value)} 
+          placeholder="Search users..." 
+          className="neo-input w-full pl-12 pr-4 py-3 text-sm md:text-base" 
+        />
       </div>
-      <div className="neo-card bg-white dark:bg-neo-gray-dark overflow-hidden">
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block neo-card bg-white dark:bg-neo-gray-dark overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr className="border-b-2 border-neo-black bg-neo-gray-light dark:bg-neo-gray-dark"><th className="text-left px-4 py-3 font-black text-sm">User</th><th className="text-left px-4 py-3 font-black text-sm">Role</th><th className="text-left px-4 py-3 font-black text-sm">VIP</th><th className="text-left px-4 py-3 font-black text-sm">Actions</th></tr></thead>
+            <thead>
+              <tr className="border-b-2 border-neo-black bg-neo-gray-light dark:bg-neo-gray-dark">
+                <th className="text-left px-4 py-3 font-black text-sm">User</th>
+                <th className="text-left px-4 py-3 font-black text-sm">Role</th>
+                <th className="text-left px-4 py-3 font-black text-sm">VIP</th>
+                <th className="text-left px-4 py-3 font-black text-sm">Actions</th>
+              </tr>
+            </thead>
             <tbody>
               {filtered.map((user) => (
                 <tr key={user.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-neo-cyan/5 dark:hover:bg-neo-purple/10">
-                  <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-10 h-10 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center"><span className="font-bold text-sm">{user.username?.charAt(0)?.toUpperCase() || "U"}</span></div><div><p className="font-bold text-sm">{user.username || "-"}</p><p className="text-xs text-gray-500">{user.email}</p></div></div></td>
-                  <td className="px-4 py-3"><span className={`neo-badge text-xs ${user.role === "admin" ? "bg-neo-purple text-white" : "bg-gray-200"}`}>{user.role}</span></td>
-                  <td className="px-4 py-3">{user.is_vip ? <span className="neo-badge bg-neo-yellow text-neo-black text-xs flex items-center gap-1"><Crown className="w-3 h-3" /> VIP</span> : <span className="text-xs text-gray-500">Free</span>}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center flex-shrink-0">
+                        <span className="font-bold text-sm">{user.username?.charAt(0)?.toUpperCase() || "U"}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm truncate">{user.username || "-"}</p>
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`neo-badge text-xs ${user.role === "admin" ? "bg-neo-purple text-white" : "bg-gray-200"}`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {user.is_vip ? (
+                      <span className="neo-badge bg-neo-yellow text-neo-black text-xs flex items-center gap-1 w-fit">
+                        <Crown className="w-3 h-3" /> VIP
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-500">Free</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 flex-wrap">
-                      <motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleVip(user.id, user.is_vip)} className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}>{user.is_vip ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}{user.is_vip ? "Remove VIP" : "Make VIP"}</motion.button>
-                      <motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleAdmin(user.id, user.role)} className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}><Shield className="w-3 h-3" />{user.role === "admin" ? "Remove Admin" : "Make Admin"}</motion.button>
+                      <motion.button 
+                        whileTap={{ scale: 0.95 }} 
+                        onClick={() => toggleVip(user.id, user.is_vip)} 
+                        className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}
+                      >
+                        {user.is_vip ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
+                        {user.is_vip ? "Remove VIP" : "Make VIP"}
+                      </motion.button>
+                      <motion.button 
+                        whileTap={{ scale: 0.95 }} 
+                        onClick={() => toggleAdmin(user.id, user.role)} 
+                        className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}
+                      >
+                        <Shield className="w-3 h-3" />
+                        {user.role === "admin" ? "Remove Admin" : "Make Admin"}
+                      </motion.button>
                     </div>
                   </td>
                 </tr>
@@ -438,9 +496,67 @@ function UsersTab() {
           </table>
         </div>
       </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {filtered.map((user) => (
+          <motion.div 
+            key={user.id} 
+            initial={{ opacity: 0, y: 10 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="neo-card bg-white dark:bg-neo-gray-dark p-4 space-y-3"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center flex-shrink-0">
+                <span className="font-bold text-lg">{user.username?.charAt(0)?.toUpperCase() || "U"}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-bold text-base truncate">{user.username || "-"}</p>
+                  {user.role === "admin" && (
+                    <span className="neo-badge text-xs bg-neo-purple text-white px-2 py-0.5">admin</span>
+                  )}
+                  {user.is_vip && (
+                    <span className="neo-badge text-xs bg-neo-yellow text-neo-black px-2 py-0.5 flex items-center gap-1">
+                      <Crown className="w-3 h-3" /> VIP
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 truncate mt-0.5">{user.email}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <motion.button 
+                whileTap={{ scale: 0.95 }} 
+                onClick={() => toggleVip(user.id, user.is_vip)} 
+                className={`neo-button py-2.5 text-sm font-bold flex items-center justify-center gap-1.5 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}
+              >
+                {user.is_vip ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                {user.is_vip ? "Remove VIP" : "Make VIP"}
+              </motion.button>
+              
+              <motion.button 
+                whileTap={{ scale: 0.95 }} 
+                onClick={() => toggleAdmin(user.id, user.role)} 
+                className={`neo-button py-2.5 text-sm font-bold flex items-center justify-center gap-1.5 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}
+              >
+                <Shield className="w-4 h-4" />
+                {user.role === "admin" ? "Remove Admin" : "Make Admin"}
+              </motion.button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-12 text-gray-500 font-medium">
+          No users found matching your search.
+        </div>
+      )}
     </div>
   )
-}
+      }
 
 function CategoriesTab() {
   const [categories, setCategories] = useState<any[]>([])
