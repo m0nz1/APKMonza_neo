@@ -135,40 +135,36 @@ export default function MembershipPage() {
           const current = isCurrentPlan(plan)
 
           return (
-            <motion.div
+            <div
               key={plan.id}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.08 }}
+              className="relative"
               onMouseEnter={() => setHoveredPlan(plan.id)}
               onMouseLeave={() => setHoveredPlan(null)}
-              className={`
-                relative neo-card overflow-hidden
-                ${isFree
-                  ? "bg-white dark:bg-neo-gray-dark border-dashed border-2 border-gray-300 dark:border-gray-600"
-                  : current
-                    ? "bg-neo-cyan/5 dark:bg-neo-purple/10 border-3 border-neo-cyan dark:border-neo-purple"
-                    : "bg-white dark:bg-neo-gray-dark border-3 border-neo-black"
-                }
-                ${plan.popular && !isFree && !current ? "shadow-neo-lg" : "shadow-neo"}
-                ${hoveredPlan === plan.id && !isFree && !current ? "md:-translate-y-1 md:translate-x-1" : ""}
-                transition-all duration-200
-              `}
             >
-              {current && (
-                <div className="absolute top-0 left-0 right-0 bg-neo-cyan dark:bg-neo-purple text-white text-center py-1">
-                  <span className="text-xs font-black flex items-center justify-center gap-1">
-                    <Star className="w-3 h-3 fill-current" /> YOUR CURRENT PLAN
-                  </span>
-                </div>
-              )}
-{plan.popular && !current && (
-  <div className={`absolute top-0 right-4 -translate-y-1/2 px-3 py-1 ${accent.bg} border-2 border-neo-black rounded-full`}>
-                  <span className={`text-xs font-black ${accent.text} flex items-center gap-1`}>
-                    <Zap className="w-3 h-3" /> MOST POPULAR
-                  </span>
-                </div>
-              )}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.08 }}
+                className={`
+                  neo-card
+                  ${isFree
+                    ? "bg-white dark:bg-neo-gray-dark border-dashed border-2 border-gray-300 dark:border-gray-600"
+                    : current
+                      ? "bg-neo-cyan/5 dark:bg-neo-purple/10 border-3 border-neo-cyan dark:border-neo-purple"
+                      : "bg-white dark:bg-neo-gray-dark border-3 border-neo-black"
+                  }
+                  ${plan.popular && !isFree && !current ? "shadow-neo-lg" : "shadow-neo"}
+                  ${hoveredPlan === plan.id && !isFree && !current ? "md:-translate-y-1 md:translate-x-1" : ""}
+                  transition-all duration-200
+                `}
+              >
+                {current && (
+                  <div className="bg-neo-cyan dark:bg-neo-purple text-white text-center py-1">
+                    <span className="text-xs font-black flex items-center justify-center gap-1">
+                      <Star className="w-3 h-3 fill-current" /> YOUR CURRENT PLAN
+                    </span>
+                  </div>
+                )}
 
               <div className={`p-4 md:p-5 ${current ? "pt-8 md:pt-9" : ""}`}>
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -283,6 +279,15 @@ export default function MembershipPage() {
                 </div>
               </div>
             </motion.div>
+
+            {plan.popular && !current && (
+              <div className={`absolute top-0 right-4 -translate-y-1/2 px-3 py-1 ${accent.bg} border-2 border-neo-black rounded-full z-10`}>
+                <span className={`text-xs font-black ${accent.text} flex items-center gap-1`}>
+                  <Zap className="w-3 h-3" /> MOST POPULAR
+                </span>
+              </div>
+            )}
+          </div>
           )
         })}
       </div>
