@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { motion } from "framer-motion"
 import { User, Crown, Download, LogOut, Edit3, Calendar, ArrowUpRight } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { formatDate } from "@/lib/utils"
 import { toast } from "sonner"
-
-// Change admin WhatsApp number here
-const ADMIN_WA_NUMBER = "6289696089274"
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
@@ -157,17 +155,16 @@ export default function ProfilePage() {
               )}
 
               <div className="flex flex-wrap gap-2 justify-center">
-                {/* VIP Upgrade button — only shows if not VIP */}
-{!profile?.is_vip && (
-  <Link
-    href="/membership"
-    className="neo-button px-4 py-2 bg-neo-yellow text-neo-black text-sm font-bold flex items-center gap-2"
-  >
-    <Crown className="w-4 h-4" /> Upgrade to VIP
-    <ArrowUpRight className="w-3 h-3" />
-  </Link>
-)}
-
+                {/* VIP Upgrade button — redirects to membership page */}
+                {!profile?.is_vip && (
+                  <Link
+                    href="/membership"
+                    className="neo-button px-4 py-2 bg-neo-yellow text-neo-black text-sm font-bold flex items-center gap-2"
+                  >
+                    <Crown className="w-4 h-4" /> Upgrade to VIP
+                    <ArrowUpRight className="w-3 h-3" />
+                  </Link>
+                )}
 
                 <button
                   onClick={() => setIsEditing(true)}
