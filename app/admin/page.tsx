@@ -434,77 +434,221 @@ function AppsTab() {
 /* ─────────────── USERS ─────────────── */
 function UsersTab() {
   const [users, setUsers] = useState<any[]>([])
+  const [plans, setPlans] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [showVipModal, setShowVipModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("")
   const supabase = createClient()
 
-  useEffect(() => { fetchUsers() }, [])
+  useEffect(() => { fetchUsers(); fetchPlans() }, [])
 
   const fetchUsers = async () => {
     const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
-    if (error) { toast.error("Failed to load users: " + error.message); return }
+    if (error) { toast.error("Failed to load users"); return }
     setUsers(data || [])
   }
 
-  const toggleVip = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase.from("users").update({ is_vip: !currentStatus, vip_expires_at: !currentStatus ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : null }).eq("id", id)
-    if (error) { toast.error("Failed to toggle VIP: " + error.message); return }
-    toast.success(`VIP ${!currentStatus ? "activated" : "deactivated"}!`); fetchUsers()
+  const fetchPlans = async () => {
+    const { data } = await supabase.from("membership_plans").select("*").eq("is_active", true).eq("is_free", false).order("sort_order")
+    setPlans(data || [])
+  }
+
+  const openVipModal = (user: any) => {
+    setSelectedUser(user)
+    setSelectedPlanId(plans[0]?.id || "")
+    setShowVipModal(true)
+  }
+
+  const handleMakeVip = async () => {
+    if (!selectedUser || !selectedPlanId) return
+    const plan = plans.find(p => p.id === selectedPlanId)
+    if (!plan) return
+
+    let days = 30
+    if (plan.period.includes("week")) days = 7
+    else if (plan.period.includes("month")) days = 30
+    else if (plan.period.includes("year")) days = 365
+    else if (plan.name.toLowerCase().includes("lifetime")) days = 36500
+
+    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+
+    const { error } = await supabase.from("users").update({ 
+      is_vip: true, vip_plan_id: selectedPlanId, vip_expires_at: expiresAt 
+    }).eq("id", selectedUser.id)
+
+    if (error) { toast.error("Failed to activate VIP"); return }
+    toast.success(`VIP ${plan.name} activated!`)
+    setShowVipModal(false)
+    fetchUsers()
+  }
+
+  const handleRemoveVip = async (id: string) => {
+    const { error } = await supabase.from("users").update({ 
+      is_vip: false, vip_plan_id: null, vip_expires_at: null 
+    }).eq("id", id)
+    if (error) { toast.error("Failed to remove VIP"); return }
+    toast.success("VIP removed!"); fetchUsers()
   }
 
   const toggleAdmin = async (id: string, currentRole: string) => {
     const newRole = currentRole === "admin" ? "user" : "admin"
     const { error } = await supabase.from("users").update({ role: newRole }).eq("id", id)
-    if (error) { toast.error("Failed to toggle admin: " + error.message); return }
-    toast.success(`Role updated to ${newRole}!`); fetchUsers()
+    if (error) { toast.error("Failed"); return }
+    toast.success(`Role: ${newRole}`); fetchUsers()
   }
 
-  const filtered = users.filter((u) => u.email?.toLowerCase().includes(searchQuery.toLowerCase()) || u.username?.toLowerCase().includes(searchQuery.toLowerCase()))
+  const getPlanName = (planId: string | null) => {
+    if (!planId) return ""
+    return plans.find(p => p.id === planId)?.name || ""
+  }
+
+  const filtered = users.filter(u => 
+    u.email?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl md:text-3xl font-black flex items-center gap-2"><Users className="w-7 h-7 md:w-8 md:h-8 text-neo-cyan dark:text-neo-purple" /> Manage Users</h1>
+      <h1 className="text-2xl md:text-3xl font-black flex items-center gap-2">
+        <Users className="w-7 h-7 md:w-8 md:h-8 text-neo-cyan dark:text-neo-purple" /> Manage Users
+      </h1>
+      
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search users..." className="neo-input w-full pl-12 pr-4 py-3 text-sm md:text-base" />
+        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Search users..." className="neo-input w-full pl-12 pr-4 py-3 text-sm md:text-base" />
       </div>
+
+      {/* Desktop */}
       <div className="hidden md:block neo-card bg-white dark:bg-neo-gray-dark overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead><tr className="border-b-2 border-neo-black bg-neo-gray-light dark:bg-neo-gray-dark"><th className="text-left px-4 py-3 font-black text-sm">User</th><th className="text-left px-4 py-3 font-black text-sm">Role</th><th className="text-left px-4 py-3 font-black text-sm">VIP</th><th className="text-left px-4 py-3 font-black text-sm">Actions</th></tr></thead>
-            <tbody>
-              {filtered.map((user) => (
-                <tr key={user.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-neo-cyan/5 dark:hover:bg-neo-purple/10">
-                  <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-10 h-10 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center flex-shrink-0"><span className="font-bold text-sm">{user.username?.charAt(0)?.toUpperCase() || "U"}</span></div><div className="min-w-0"><p className="font-bold text-sm truncate">{user.username || "-"}</p><p className="text-xs text-gray-500 truncate">{user.email}</p></div></div></td>
-                  <td className="px-4 py-3"><span className={`neo-badge text-xs ${user.role === "admin" ? "bg-neo-purple text-white" : "bg-gray-200"}`}>{user.role}</span></td>
-                  <td className="px-4 py-3">{user.is_vip ? <span className="neo-badge bg-neo-yellow text-neo-black text-xs flex items-center gap-1 w-fit"><Crown className="w-3 h-3" /> VIP</span> : <span className="text-xs text-gray-500">Free</span>}</td>
-                  <td className="px-4 py-3"><div className="flex gap-2 flex-wrap"><motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleVip(user.id, user.is_vip)} className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}>{user.is_vip ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}{user.is_vip ? "Remove VIP" : "Make VIP"}</motion.button><motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleAdmin(user.id, user.role)} className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}><Shield className="w-3 h-3" />{user.role === "admin" ? "Remove Admin" : "Make Admin"}</motion.button></div></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <table className="w-full">
+          <thead>
+            <tr className="border-b-2 border-neo-black bg-neo-gray-light dark:bg-neo-gray-dark">
+              <th className="text-left px-4 py-3 font-black text-sm">User</th>
+              <th className="text-left px-4 py-3 font-black text-sm">Role</th>
+              <th className="text-left px-4 py-3 font-black text-sm">VIP Plan</th>
+              <th className="text-left px-4 py-3 font-black text-sm">Expires</th>
+              <th className="text-left px-4 py-3 font-black text-sm">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(user => (
+              <tr key={user.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-neo-cyan/5">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center">
+                      <span className="font-bold text-sm">{user.username?.charAt(0)?.toUpperCase() || "U"}</span>
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm">{user.username || "-"}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`neo-badge text-xs ${user.role === "admin" ? "bg-neo-purple text-white" : "bg-gray-200"}`}>{user.role}</span>
+                </td>
+                <td className="px-4 py-3">
+                  {user.is_vip ? (
+                    <span className="neo-badge bg-neo-yellow text-neo-black text-xs flex items-center gap-1">
+                      <Crown className="w-3 h-3" /> {getPlanName(user.vip_plan_id) || "VIP"}
+                    </span>
+                  ) : <span className="text-xs text-gray-500">Free</span>}
+                </td>
+                <td className="px-4 py-3 text-xs text-gray-500">{user.vip_expires_at ? formatDate(user.vip_expires_at) : "-"}</td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    {user.is_vip ? (
+                      <button onClick={() => handleRemoveVip(user.id)} className="neo-button px-3 py-1.5 text-xs font-bold bg-red-500 text-white">
+                        <UserX className="w-3 h-3 inline" /> Remove
+                      </button>
+                    ) : (
+                      <button onClick={() => openVipModal(user)} className="neo-button px-3 py-1.5 text-xs font-bold bg-neo-yellow text-neo-black">
+                        <UserCheck className="w-3 h-3 inline" /> Make VIP
+                      </button>
+                    )}
+                    <button onClick={() => toggleAdmin(user.id, user.role)} className={`neo-button px-3 py-1.5 text-xs font-bold ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}>
+                      <Shield className="w-3 h-3 inline" /> {user.role === "admin" ? "Remove Admin" : "Make Admin"}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {/* Mobile */}
       <div className="md:hidden space-y-3">
-        {filtered.map((user) => (
-          <motion.div key={user.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="neo-card bg-white dark:bg-neo-gray-dark p-4 space-y-3">
+        {filtered.map(user => (
+          <div key={user.id} className="neo-card bg-white dark:bg-neo-gray-dark p-4 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="w-12 h-12 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center flex-shrink-0"><span className="font-bold text-lg">{user.username?.charAt(0)?.toUpperCase() || "U"}</span></div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap"><p className="font-bold text-base truncate">{user.username || "-"}</p>{user.role === "admin" && <span className="neo-badge text-xs bg-neo-purple text-white px-2 py-0.5">admin</span>}{user.is_vip && <span className="neo-badge text-xs bg-neo-yellow text-neo-black px-2 py-0.5 flex items-center gap-1"><Crown className="w-3 h-3" /> VIP</span>}</div>
-                <p className="text-sm text-gray-500 truncate mt-0.5">{user.email}</p>
+              <div className="w-12 h-12 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center">
+                <span className="font-bold text-lg">{user.username?.charAt(0)?.toUpperCase() || "U"}</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-bold">{user.username || "-"}</p>
+                  {user.role === "admin" && <span className="neo-badge text-xs bg-neo-purple text-white">admin</span>}
+                  {user.is_vip && <span className="neo-badge text-xs bg-neo-yellow text-neo-black flex items-center gap-1"><Crown className="w-3 h-3" /> {getPlanName(user.vip_plan_id)}</span>}
+                </div>
+                <p className="text-sm text-gray-500">{user.email}</p>
+                {user.vip_expires_at && <p className="text-xs text-gray-400">Expires: {formatDate(user.vip_expires_at)}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleVip(user.id, user.is_vip)} className={`neo-button py-2.5 text-sm font-bold flex items-center justify-center gap-1.5 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}>{user.is_vip ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}{user.is_vip ? "Remove VIP" : "Make VIP"}</motion.button>
-              <motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleAdmin(user.id, user.role)} className={`neo-button py-2.5 text-sm font-bold flex items-center justify-center gap-1.5 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}><Shield className="w-4 h-4" />{user.role === "admin" ? "Remove Admin" : "Make Admin"}</motion.button>
+            <div className="grid grid-cols-2 gap-2">
+              {user.is_vip ? (
+                <button onClick={() => handleRemoveVip(user.id)} className="neo-button py-2.5 text-sm font-bold bg-red-500 text-white">
+                  <UserX className="w-4 h-4 inline" /> Remove VIP
+                </button>
+              ) : (
+                <button onClick={() => openVipModal(user)} className="neo-button py-2.5 text-sm font-bold bg-neo-yellow text-neo-black">
+                  <UserCheck className="w-4 h-4 inline" /> Make VIP
+                </button>
+              )}
+              <button onClick={() => toggleAdmin(user.id, user.role)} className={`neo-button py-2.5 text-sm font-bold ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}>
+                <Shield className="w-4 h-4 inline" /> {user.role === "admin" ? "Remove Admin" : "Make Admin"}
+              </button>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
-      {filtered.length === 0 && <div className="text-center py-12 text-gray-500 font-medium">No users found matching your search.</div>}
+
+      {/* VIP Modal */}
+      {showVipModal && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="neo-card bg-white dark:bg-neo-gray-dark w-full max-w-md border-3 border-neo-black p-6">
+            <h2 className="text-xl font-black mb-4 flex items-center gap-2"><Crown className="w-5 h-5 text-neo-yellow" /> Activate VIP</h2>
+            <p className="text-sm text-gray-500 mb-4">User: <span className="font-bold">{selectedUser.username || selectedUser.email}</span></p>
+            <div className="space-y-2 mb-4">
+              {plans.map(plan => (
+                <button key={plan.id} onClick={() => setSelectedPlanId(plan.id)}
+                  className={`w-full neo-card p-3 flex items-center gap-3 border-2 ${selectedPlanId === plan.id ? "border-neo-cyan bg-neo-cyan/5" : "border-neo-black"}`}>
+                  <div className={`w-8 h-8 rounded-lg border-2 border-neo-black flex items-center justify-center ${plan.accent === 'yellow' ? 'bg-neo-yellow' : plan.accent === 'purple' ? 'bg-neo-purple' : 'bg-neo-cyan'}`}>
+                    <Crown className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-bold text-sm">{plan.name}</p>
+                    <p className="text-xs text-gray-500">{plan.price}{plan.period}</p>
+                  </div>
+                  {selectedPlanId === plan.id && <Check className="w-5 h-5 text-neo-cyan" />}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowVipModal(false)} className="flex-1 neo-button py-3 bg-gray-200 text-sm font-bold">Cancel</button>
+              <button onClick={handleMakeVip} className="flex-1 neo-button py-3 bg-neo-yellow text-neo-black text-sm font-bold">
+                <Crown className="w-4 h-4 inline" /> Activate
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }
+
 
 /* ─────────────── CATEGORIES ─────────────── */
 function CategoriesTab() {
