@@ -18,7 +18,7 @@ type Tab = "dashboard" | "apps" | "users" | "categories"
 
 const tabs = [
   { id: "dashboard" as Tab, label: "Dashboard", icon: LayoutDashboard },
-  { id: ": "apps" as Tab, label: "Apps", icon: Package },
+  { id: "apps" as Tab, label: "Apps", icon: Package },
   { id: "users" as Tab, label: "Users", icon: Users },
   { id: "categories" as Tab, label: "Categories", icon: Tags },
 ]
