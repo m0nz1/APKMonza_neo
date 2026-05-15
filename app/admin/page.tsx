@@ -9,6 +9,7 @@ import {
   Image as ImageIcon, BarChart3, TrendingUp,
   Download, X, Star, Link as LinkIcon, Trash,
   CreditCard, Tag, AlertTriangle, GripVertical, Zap, Loader2, ChevronUp, ChevronDown,
+  Check, // <-- add this
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { App, MembershipPlan } from "@/types"
