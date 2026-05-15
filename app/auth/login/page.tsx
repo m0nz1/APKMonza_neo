@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Mail, Lock, Eye, EyeOff, Download } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, Download, ArrowLeft } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
@@ -32,7 +32,7 @@ export default function LoginPage() {
       return
     }
 
-    toast.success("Login berhasil!")
+    toast.success("Login successful!")
     router.push("/profile")
     router.refresh()
   }
@@ -41,8 +41,20 @@ export default function LoginPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-md"
+      className="w-full max-w-md relative"
     >
+      {/* Back Button */}
+      <motion.button
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+        onClick={() => router.back()}
+        className="absolute -top-2 -left-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Back
+      </motion.button>
+
       {/* Logo */}
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-neo-cyan dark:bg-neo-purple border-3 border-neo-black rounded-xl shadow-neo flex items-center justify-center mx-auto mb-4">
@@ -52,7 +64,7 @@ export default function LoginPage() {
           <span className="text-neo-cyan dark:text-neo-purple">Neo</span>
           <span className="text-neo-yellow">Store</span>
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">Login ke akun Anda</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">Login to your account</p>
       </div>
 
       {/* Form Card */}
@@ -98,10 +110,10 @@ export default function LoginPage() {
           <div className="flex items-center justify-between text-sm">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" className="w-4 h-4 border-2 border-neo-black rounded" />
-              <span>Ingat saya</span>
+              <span>Remember me</span>
             </label>
             <Link href="/auth/forgot-password" className="text-neo-cyan dark:text-neo-purple font-bold hover:underline">
-              Lupa password?
+              Forgot password?
             </Link>
           </div>
 
@@ -117,9 +129,9 @@ export default function LoginPage() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Belum punya akun?{" "}
+            Don't have an account?{" "}
             <Link href="/auth/register" className="text-neo-cyan dark:text-neo-purple font-bold hover:underline">
-              Daftar
+              Register
             </Link>
           </p>
         </div>
