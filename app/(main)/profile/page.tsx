@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client"
 import { formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 
-// Ganti nomor WhatsApp admin di sini
+// Change admin WhatsApp number here
 const ADMIN_WA_NUMBER = "6289696089274"
 
 export default function ProfilePage() {
@@ -61,13 +61,13 @@ export default function ProfilePage() {
       .eq("id", user.id)
 
     if (error) {
-      toast.error("Gagal update profile")
+      toast.error("Failed to update profile")
       return
     }
 
     setProfile({ ...profile, username })
     setIsEditing(false)
-    toast.success("Profile diperbarui!")
+    toast.success("Profile updated!")
   }
 
   const handleLogout = async () => {
@@ -122,10 +122,10 @@ export default function ProfilePage() {
               />
               <div className="flex gap-2 justify-center">
                 <button onClick={handleUpdateProfile} className="neo-button px-4 py-2 bg-neo-cyan dark:bg-neo-purple text-white text-sm">
-                  Simpan
+                  Save
                 </button>
                 <button onClick={() => setIsEditing(false)} className="neo-button px-4 py-2 bg-gray-200 text-sm">
-                  Batal
+                  Cancel
                 </button>
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function ProfilePage() {
               )}
 
               <div className="flex flex-wrap gap-2 justify-center">
-                {/* Tombol Upgrade VIP — hanya muncul kalau belum VIP */}
+                {/* VIP Upgrade button — only shows if not VIP */}
                 {!profile?.is_vip && (
                   <a
                     href={`https://wa.me/6289696089274?text=Saya%20mau%20berlangganan%20VIP%20di%20APKMonza`}
@@ -197,7 +197,7 @@ export default function ProfilePage() {
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Download className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
-          Riwayat Download
+          Download History
         </h2>
 
         {downloads.length > 0 ? (
@@ -218,9 +218,9 @@ export default function ProfilePage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-center py-8">Belum ada riwayat download</p>
+          <p className="text-gray-500 text-center py-8">No download history yet</p>
         )}
       </motion.div>
     </main>
   )
-              }
+}
