@@ -8,7 +8,7 @@ import {
   Plus, Pencil, Trash2, Search, Crown, UserCheck, UserX,
   Image as ImageIcon, BarChart3, TrendingUp,
   Download, X, Star, Link as LinkIcon, Trash,
-  CreditCard, Tag, AlertTriangle, GripVertical, Zap, Loader2,
+  CreditCard, Tag, AlertTriangle, GripVertical, Zap, Loader2, ChevronUp, ChevronDown,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { App, MembershipPlan } from "@/types"
@@ -576,443 +576,178 @@ function CategoriesTab() {
 
 /* ─────────────── MEMBERSHIP ─────────────── */
 function MembershipTab() {
-  const [plans, setPlans] = useState<MembershipPlan[]>([])
+  const [plans, setPlans] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [editingPlan, setEditingPlan] = useState<Partial<MembershipPlan> | null>(null)
+  const [editingPlan, setEditingPlan] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [expandedPlan, setExpandedPlan] = useState<string | null>(null)
   const supabase = createClient()
 
-  const fetchPlans = useCallback(async () => {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from("membership_plans")
-      .select("*")
-      .order("sort_order", { ascending: true })
-
-    if (error) {
-      toast.error("Failed to load membership plans")
-      console.error(error)
-    } else {
-      setPlans(data || [])
-    }
+  const fetchPlans = async () => {
+    const { data } = await supabase.from("membership_plans").select("*").order("sort_order")
+    setPlans(data || [])
     setLoading(false)
-  }, [supabase])
+  }
 
-  useEffect(() => {
-    fetchPlans()
-  }, [fetchPlans])
+  useEffect(() => { fetchPlans() }, [])
 
   const handleSave = async () => {
     if (!editingPlan) return
-    setSaving(true)
-
-    const planData = {
-      ...editingPlan,
-      features: editingPlan.features || [],
-    }
-
-    if (planData.id) {
-      const { error } = await supabase
-        .from("membership_plans")
-        .update(planData)
-        .eq("id", planData.id)
-
-      if (error) {
-        toast.error("Failed to update plan")
-        console.error(error)
-      } else {
-        toast.success("Plan updated successfully")
-        fetchPlans()
-        setIsModalOpen(false)
-        setEditingPlan(null)
-      }
+    if (editingPlan.id) {
+      await supabase.from("membership_plans").update(editingPlan).eq("id", editingPlan.id)
+      toast.success("Updated")
     } else {
-      const { error } = await supabase
-        .from("membership_plans")
-        .insert(planData)
-
-      if (error) {
-        toast.error("Failed to create plan")
-        console.error(error)
-      } else {
-        toast.success("Plan created successfully")
-        fetchPlans()
-        setIsModalOpen(false)
-        setEditingPlan(null)
-      }
+      await supabase.from("membership_plans").insert(editingPlan)
+      toast.success("Created")
     }
-
-    setSaving(false)
+    setIsModalOpen(false)
+    fetchPlans()
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this plan?")) return
-
-    const { error } = await supabase.from("membership_plans").delete().eq("id", id)
-
-    if (error) {
-      toast.error("Failed to delete plan")
-    } else {
-      toast.success("Plan deleted")
-      fetchPlans()
-    }
+    if (!confirm("Delete?")) return
+    await supabase.from("membership_plans").delete().eq("id", id)
+    toast.success("Deleted")
+    fetchPlans()
   }
 
-  const openEdit = (plan: MembershipPlan) => {
-    setEditingPlan({ ...plan })
-    setIsModalOpen(true)
-  }
-
-  const openCreate = () => {
-    const maxOrder = plans.length > 0 ? Math.max(...plans.map((p) => p.sort_order)) + 1 : 0
-    setEditingPlan({ ...EMPTY_PLAN, sort_order: maxOrder })
-    setIsModalOpen(true)
-  }
-
-  const updateFeature = (index: number, value: string) => {
-    if (!editingPlan) return
-    const newFeatures = [...(editingPlan.features || [])]
-    newFeatures[index] = value
-    setEditingPlan({ ...editingPlan, features: newFeatures })
-  }
-
-  const addFeature = () => {
-    if (!editingPlan) return
-    setEditingPlan({ ...editingPlan, features: [...(editingPlan.features || []), ""] })
-  }
-
-  const removeFeature = (index: number) => {
-    if (!editingPlan) return
-    const newFeatures = (editingPlan.features || []).filter((_, i) => i !== index)
-    setEditingPlan({ ...editingPlan, features: newFeatures })
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-neo-cyan" />
-      </div>
-    )
-  }
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-neo-cyan" /></div>
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-neo-yellow border-2 border-neo-black rounded-lg flex items-center justify-center shadow-neo">
-            <Crown className="w-5 h-5 text-neo-black" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black dark:text-white">Membership Plans</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Manage pricing, discounts & maintenance info</p>
-          </div>
-        </div>
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={openCreate}
-          className="neo-button px-4 py-2 bg-neo-cyan text-white font-bold flex items-center gap-2 border-2 border-neo-black"
-        >
-          <Plus className="w-4 h-4" /> Add Plan
-        </motion.button>
+        <h1 className="text-2xl font-black flex items-center gap-2"><Crown className="w-6 h-6 text-neo-yellow" /> Membership Plans</h1>
+        <button onClick={() => { setEditingPlan({ name: "", price: "", period: "", description: "", features: [], accent: "cyan", sort_order: plans.length, is_active: true, is_free: false, popular: false }); setIsModalOpen(true) }}
+          className="neo-button px-4 py-2 bg-neo-cyan text-white font-bold text-sm">
+          <Plus className="w-4 h-4 inline" /> Add
+        </button>
       </div>
 
-      {/* Plans List */}
-      <div className="space-y-3">
-        {plans.map((plan, index) => (
-          <motion.div
-            key={plan.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className={`
-              neo-card p-4 flex items-center gap-4
-              ${plan.is_active ? "bg-white dark:bg-neo-gray-dark" : "bg-gray-100 dark:bg-gray-800 opacity-60"}
-              border-2 border-neo-black
-            `}
-          >
-            <div className="flex-shrink-0 text-gray-400">
-              <GripVertical className="w-5 h-5" />
-            </div>
-
-            <div className={`
-              flex-shrink-0 w-10 h-10 rounded-lg border-2 border-neo-black flex items-center justify-center
-              ${plan.accent === 'yellow' ? 'bg-neo-yellow' : plan.accent === 'purple' ? 'bg-neo-purple' : 'bg-neo-cyan'}
-            `}>
-              {plan.is_free ? (
-                <Shield className="w-5 h-5 text-white" />
-              ) : (
-                <Crown className="w-5 h-5 text-white" />
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-black dark:text-white truncate">{plan.name}</h3>
-                {plan.popular && (
-                  <span className="px-2 py-0.5 bg-neo-yellow text-neo-black text-xs font-black rounded-full border border-neo-black">
-                    POPULAR
-                  </span>
-                )}
-                {plan.info_gangguan && (
-                  <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded-full border border-red-400 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" /> {plan.info_gangguan}
-                  </span>
-                )}
-                {!plan.is_active && (
-                  <span className="px-2 py-0.5 bg-gray-200 text-gray-600 text-xs font-bold rounded-full border border-gray-400">
-                    INACTIVE
-                  </span>
-                )}
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-3">
+        {plans.map(plan => (
+          <div key={plan.id} className={`neo-card overflow-hidden border-2 border-neo-black ${plan.is_active ? "bg-white dark:bg-neo-gray-dark" : "opacity-60"}`}>
+            <div className="p-4">
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-lg border-2 border-neo-black flex items-center justify-center ${plan.accent === 'yellow' ? 'bg-neo-yellow' : plan.accent === 'purple' ? 'bg-neo-purple' : 'bg-neo-cyan'}`}>
+                  <Crown className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-black">{plan.name}</h3>
+                    {plan.popular && <span className="px-2 py-0.5 bg-neo-yellow text-xs font-black rounded-full border border-neo-black">POPULAR</span>}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="font-bold">{plan.price}</span>
+                    {plan.original_price && <span className="text-gray-400 line-through text-sm">{plan.original_price}</span>}
+                    {plan.discount_percent > 0 && <span className="px-1.5 bg-red-100 text-red-600 text-xs font-black rounded border border-red-400">-{plan.discount_percent}%</span>}
+                  </div>
+                  {plan.info_gangguan && (
+                    <div className="mt-2 p-2 bg-red-100 border border-red-400 rounded-lg flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-red-500" />
+                      <span className="text-xs font-bold text-red-600">{plan.info_gangguan}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3 mt-1 text-sm flex-wrap">
-                <span className="font-bold text-neo-black dark:text-white">{plan.price}</span>
-                {plan.original_price && (
-                  <span className="text-gray-400 line-through">{plan.original_price}</span>
-                )}
-                {plan.discount_percent && plan.discount_percent > 0 && (
-                  <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs font-black rounded border border-red-400 flex items-center gap-1">
-                    <Tag className="w-3 h-3" /> -{plan.discount_percent}%
-                  </span>
-                )}
-                <span className="text-gray-500">{plan.period}</span>
-                <span className="text-gray-400">•</span>
-                <span className="text-gray-500 truncate">{plan.description}</span>
-                <span className="text-gray-400">•</span>
-                <span className="text-xs text-gray-400">{plan.features.length} features</span>
+              <button onClick={() => setExpandedPlan(expandedPlan === plan.id ? null : plan.id)}
+                className="w-full mt-3 text-xs font-bold text-gray-500 py-2 border-t border-gray-200 flex items-center justify-center gap-1">
+                {expandedPlan === plan.id ? <><ChevronUp className="w-4 h-4" /> Less</> : <><ChevronDown className="w-4 h-4" /> More</>}
+              </button>
+            </div>
+            {expandedPlan === plan.id && (
+              <div className="px-4 pb-4 space-y-3 border-t border-gray-200">
+                <p className="text-sm text-gray-600">{plan.description}</p>
+                <div className="space-y-1">
+                  {plan.features?.map((f: string, i: number) => (
+                    <div key={i} className="flex items-center gap-2 text-sm"><Tag className="w-3 h-3 text-gray-400" /><span className="text-gray-600">{f}</span></div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => { setEditingPlan({...plan}); setIsModalOpen(true) }} className="flex-1 neo-button py-2 bg-neo-yellow text-neo-black text-sm font-bold">
+                    <Pencil className="w-3 h-3 inline" /> Edit
+                  </button>
+                  <button onClick={() => handleDelete(plan.id)} className="neo-button p-2 bg-red-100 text-red-600 border-2 border-red-400">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={() => openEdit(plan)}
-                className="neo-button px-3 py-2 bg-neo-yellow text-neo-black text-xs font-black border-2 border-neo-black"
-              >
-                <Pencil className="w-3 h-3 inline mr-1" /> Edit
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleDelete(plan.id)}
-                className="neo-button p-2 bg-red-100 text-red-600 border-2 border-red-400"
-              >
-                <Trash2 className="w-4 h-4" />
-              </motion.button>
-            </div>
-          </motion.div>
+            )}
+          </div>
         ))}
       </div>
 
-      {plans.length === 0 && (
-        <div className="text-center py-12 neo-card bg-white dark:bg-neo-gray-dark border-2 border-dashed border-gray-300 dark:border-gray-600">
-          <Crown className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-          <p className="font-bold text-gray-500">No membership plans yet</p>
-          <p className="text-sm text-gray-400 mt-1">Click "Add Plan" to create your first plan</p>
-        </div>
-      )}
-
-      {/* Edit/Create Modal */}
-      {isModalOpen && editingPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="neo-card bg-white dark:bg-neo-gray-dark w-full max-w-lg max-h-[90vh] overflow-y-auto border-3 border-neo-black"
-          >
-            <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-black dark:text-white">
-                  {editingPlan.id ? "Edit Plan" : "New Plan"}
-                </h2>
-                <button
-                  onClick={() => { setIsModalOpen(false); setEditingPlan(null) }}
-                  className="neo-button p-2 bg-gray-100 dark:bg-neo-gray-dark border-2 border-neo-black"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+      {/* Desktop List */}
+      <div className="hidden md:block space-y-3">
+        {plans.map(plan => (
+          <div key={plan.id} className={`neo-card p-4 flex items-center gap-4 border-2 border-neo-black ${plan.is_active ? "bg-white dark:bg-neo-gray-dark" : "opacity-60"}`}>
+            <div className={`w-10 h-10 rounded-lg border-2 border-neo-black flex items-center justify-center ${plan.accent === 'yellow' ? 'bg-neo-yellow' : plan.accent === 'purple' ? 'bg-neo-purple' : 'bg-neo-cyan'}`}>
+              <Crown className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-black">{plan.name}</h3>
+                {plan.popular && <span className="px-2 py-0.5 bg-neo-yellow text-xs font-black rounded-full border border-neo-black">POPULAR</span>}
+                {plan.info_gangguan && <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded-full border border-red-400 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{plan.info_gangguan}</span>}
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Plan Name</label>
-                  <input
-                    type="text"
-                    value={editingPlan.name || ""}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
-                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                    placeholder="VIP Monthly"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Price</label>
-                  <input
-                    type="text"
-                    value={editingPlan.price || ""}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
-                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                    placeholder="Rp15.000"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Original Price (for discount)</label>
-                  <input
-                    type="text"
-                    value={editingPlan.original_price || ""}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, original_price: e.target.value || null })}
-                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                    placeholder="Rp20.000"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Period</label>
-                  <input
-                    type="text"
-                    value={editingPlan.period || ""}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, period: e.target.value })}
-                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                    placeholder="/ month"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Discount %</label>
-                  <input
-                    type="number"
-                    value={editingPlan.discount_percent || ""}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, discount_percent: e.target.value ? parseInt(e.target.value) : null })}
-                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                    placeholder="25"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Description</label>
-                  <input
-                    type="text"
-                    value={editingPlan.description || ""}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, description: e.target.value })}
-                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                    placeholder="Best for regular users"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Info Gangguan / Maintenance</label>
-                  <input
-                    type="text"
-                    value={editingPlan.info_gangguan || ""}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, info_gangguan: e.target.value || null })}
-                    className="w-full p-2 border-2 border-red-400 rounded-lg bg-red-50 dark:bg-red-900/20 dark:text-white font-bold text-sm"
-                    placeholder="Maintenance until 20:00"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Accent Color</label>
-                  <select
-                    value={editingPlan.accent || "cyan"}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, accent: e.target.value as any })}
-                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                  >
-                    {ACCENT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Sort Order</label>
-                  <input
-                    type="number"
-                    value={editingPlan.sort_order || 0}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, sort_order: parseInt(e.target.value) })}
-                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                  />
-                </div>
-
-                <div className="col-span-2 flex gap-4 flex-wrap">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editingPlan.popular || false}
-                      onChange={(e) => setEditingPlan({ ...editingPlan, popular: e.target.checked })}
-                      className="w-4 h-4 border-2 border-neo-black rounded"
-                    />
-                    <span className="text-sm font-bold dark:text-white">Popular</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editingPlan.is_active || false}
-                      onChange={(e) => setEditingPlan({ ...editingPlan, is_active: e.target.checked })}
-                      className="w-4 h-4 border-2 border-neo-black rounded"
-                    />
-                    <span className="text-sm font-bold dark:text-white">Active</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editingPlan.is_free || false}
-                      onChange={(e) => setEditingPlan({ ...editingPlan, is_free: e.target.checked })}
-                      className="w-4 h-4 border-2 border-neo-black rounded"
-                    />
-                    <span className="text-sm font-bold dark:text-white">Free Plan</span>
-                  </label>
-                </div>
-
-                <div className="col-span-2">
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Features</label>
-                  <div className="space-y-2">
-                    {(editingPlan.features || []).map((feature, i) => (
-                      <div key={i} className="flex gap-2">
-                        <input
-                          type="text"
-                          value={feature}
-                          onChange={(e) => updateFeature(i, e.target.value)}
-                          className="flex-1 p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
-                          placeholder={`Feature ${i + 1}`}
-                        />
-                        <button
-                          onClick={() => removeFeature(i)}
-                          className="neo-button p-2 bg-red-100 text-red-600 border-2 border-red-400"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={addFeature}
-                      className="neo-button px-3 py-2 bg-gray-100 dark:bg-neo-gray-dark text-sm font-bold border-2 border-neo-black w-full"
-                    >
-                      <Plus className="w-4 h-4 inline mr-1" /> Add Feature
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => { setIsModalOpen(false); setEditingPlan(null) }}
-                  className="flex-1 neo-button px-4 py-3 bg-gray-200 dark:bg-neo-gray-dark text-sm font-bold border-2 border-neo-black"
-                >
-                  Cancel
-                </button>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="flex-1 neo-button px-4 py-3 bg-neo-cyan text-white text-sm font-bold border-2 border-neo-black flex items-center justify-center gap-2"
-                >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                  {saving ? "Saving..." : "Save Plan"}
-                </motion.button>
+              <div className="flex items-center gap-3 text-sm">
+                <span className="font-bold">{plan.price}</span>
+                {plan.original_price && <span className="text-gray-400 line-through">{plan.original_price}</span>}
+                {plan.discount_percent > 0 && <span className="px-1.5 bg-red-100 text-red-600 text-xs font-black rounded border border-red-400">-{plan.discount_percent}%</span>}
+                <span className="text-gray-500">{plan.period}</span>
+                <span className="text-gray-500">{plan.description}</span>
               </div>
             </div>
-          </motion.div>
+            <div className="flex gap-2">
+              <button onClick={() => { setEditingPlan({...plan}); setIsModalOpen(true) }} className="neo-button px-3 py-2 bg-neo-yellow text-neo-black text-xs font-bold">Edit</button>
+              <button onClick={() => handleDelete(plan.id)} className="neo-button p-2 bg-red-100 text-red-600 border-2 border-red-400"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal */}
+      {isModalOpen && editingPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
+          <div className="neo-card bg-white dark:bg-neo-gray-dark w-full max-w-lg border-3 border-neo-black p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-black mb-4">{editingPlan.id ? "Edit" : "New"} Plan</h2>
+            <div className="space-y-3">
+              <input value={editingPlan.name || ""} onChange={e => setEditingPlan({...editingPlan, name: e.target.value})} placeholder="Name" className="neo-input w-full p-2" />
+              <div className="grid grid-cols-2 gap-3">
+                <input value={editingPlan.price || ""} onChange={e => setEditingPlan({...editingPlan, price: e.target.value})} placeholder="Price" className="neo-input w-full p-2" />
+                <input value={editingPlan.original_price || ""} onChange={e => setEditingPlan({...editingPlan, original_price: e.target.value || null})} placeholder="Original Price" className="neo-input w-full p-2" />
+              </div>
+              <input value={editingPlan.period || ""} onChange={e => setEditingPlan({...editingPlan, period: e.target.value})} placeholder="Period" className="neo-input w-full p-2" />
+              <input value={editingPlan.description || ""} onChange={e => setEditingPlan({...editingPlan, description: e.target.value})} placeholder="Description" className="neo-input w-full p-2" />
+              <input value={editingPlan.info_gangguan || ""} onChange={e => setEditingPlan({...editingPlan, info_gangguan: e.target.value || null})} placeholder="Info Gangguan" className="neo-input w-full p-2 border-red-400" />
+              <div className="grid grid-cols-2 gap-3">
+                <select value={editingPlan.accent || "cyan"} onChange={e => setEditingPlan({...editingPlan, accent: e.target.value})} className="neo-input w-full p-2">
+                  <option value="cyan">Cyan</option>
+                  <option value="yellow">Yellow</option>
+                  <option value="purple">Purple</option>
+                </select>
+                <input type="number" value={editingPlan.sort_order || 0} onChange={e => setEditingPlan({...editingPlan, sort_order: parseInt(e.target.value)})} placeholder="Sort Order" className="neo-input w-full p-2" />
+              </div>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={editingPlan.popular || false} onChange={e => setEditingPlan({...editingPlan, popular: e.target.checked})} /> Popular</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={editingPlan.is_active !== false} onChange={e => setEditingPlan({...editingPlan, is_active: e.target.checked})} /> Active</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={editingPlan.is_free || false} onChange={e => setEditingPlan({...editingPlan, is_free: e.target.checked})} /> Free</label>
+              </div>
+              <div className="space-y-2">
+                {(editingPlan.features || []).map((f: string, i: number) => (
+                  <div key={i} className="flex gap-2">
+                    <input value={f} onChange={e => { const nf = [...(editingPlan.features || [])]; nf[i] = e.target.value; setEditingPlan({...editingPlan, features: nf}) }} className="flex-1 neo-input p-2" />
+                    <button onClick={() => setEditingPlan({...editingPlan, features: (editingPlan.features || []).filter((_:any, ii:number) => ii !== i)})} className="neo-button p-2 bg-red-100 text-red-600 border-red-400"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                <button onClick={() => setEditingPlan({...editingPlan, features: [...(editingPlan.features || []), ""]})} className="neo-button w-full py-2 bg-gray-100 text-sm font-bold">+ Add Feature</button>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setIsModalOpen(false)} className="flex-1 neo-button py-2 bg-gray-200 font-bold">Cancel</button>
+                <button onClick={handleSave} className="flex-1 neo-button py-2 bg-neo-cyan text-white font-bold">Save</button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
