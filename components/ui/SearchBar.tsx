@@ -31,7 +31,7 @@ export function SearchBar({ initialQuery = "", onSearch }: SearchBarProps) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cari aplikasi atau game..."
+          placeholder="Search for apps or games..."
           className="neo-input w-full pl-12 pr-10 py-3 text-sm font-medium"
         />
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
