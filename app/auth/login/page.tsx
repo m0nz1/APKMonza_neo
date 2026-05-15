@@ -41,15 +41,15 @@ export default function LoginPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-md relative"
+      className="w-full max-w-md relative pt-10"
     >
       {/* Back Button */}
       <motion.button
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 }}
-        onClick={() => router.back()}
-        className="absolute -top-2 -left-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400"
+        onClick={() => router.push("/")}
+        className="absolute -top-4 left-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400"
       >
         <ArrowLeft className="w-5 h-5" />
         Back
