@@ -195,7 +195,7 @@ function DashboardTab() {
 }
 
 function AppsTab() {
-  const [apps, setApps] = useState<<App[]>([])
+  const [apps, setApps] = useState<App[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [showModal, setShowModal] = useState(false)
   const [editingApp, setEditingApp] = useState<<App | null>(null)
