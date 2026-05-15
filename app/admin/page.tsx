@@ -195,22 +195,22 @@ function DashboardTab() {
 }
 
 function AppsTab() {
-  const [apps, setApps] = useState<<App[]>([])
+  const [apps, setApps] = useState<App[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [showModal, setShowModal] = useState(false)
-  const [editingApp, setEditingApp] = useState<<App | null>(null)
+  const [editingApp, setEditingApp] = useState<App | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [screenshotUrl, setScreenshotUrl] = useState("")
   const supabase = createClient()
 
-  const emptyApp: Partial<<App> = {
+  const emptyApp: Partial<App> = {
     name: "", slug: "", version: "", developer: "",
     mod_feature: "", mod_feature_full: "", description: "",
     package_name: "", size: "", free_url: "", vip_url: "",
     category_id: "", icon_url: "", screenshots: [], is_recommended: false,
     rating: 4.5, download_count: 0,
   }
-  const [formData, setFormData] = useState<<Partial<<App>>(emptyApp)
+  const [formData, setFormData] = useState<Partial<App>>(emptyApp)
 
   useEffect(() => { fetchApps(); fetchCategories() }, [])
 
@@ -380,7 +380,7 @@ function AppsTab() {
                     onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
                     className="neo-input w-full px-3 py-2"
                     placeholder="4.5"
-                  />
+    />
                 </div>
                 <div>
                   <label className="block font-bold text-sm mb-1 flex items-center gap-1">
@@ -718,7 +718,7 @@ function CategoriesTab() {
           <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="neo-card bg-white dark:bg-neo-gray-dark p-6 max-w-md w-full">
             <div className="flex items-center justify-between mb-4"><h2 className="text-xl font-black">{editingCat ? "Edit" : "Add"} Category</h2><button onClick={() => setShowModal(false)} className="neo-button p-2"><X className="w-4 h-4" /></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-                            <div><label className="block font-bold text-sm mb-1">Name</label><input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="neo-input w-full px-3 py-2" /></div>
+                           <div><label className="block font-bold text-sm mb-1">Name</label><input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="neo-input w-full px-3 py-2" /></div>
               <div><label className="block font-bold text-sm mb-1">Icon (lucide name)</label><input value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="gamepad2" /></div>
               <div><label className="block font-bold text-sm mb-1">Color</label><div className="flex gap-2"><input type="color" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="w-12 h-10 border-2 border-neo-black rounded-lg cursor-pointer" /><input value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="neo-input flex-1 px-3 py-2" /></div></div>
               <div className="flex gap-3 pt-2"><button type="button" onClick={() => setShowModal(false)} className="neo-button flex-1 py-2 bg-gray-200 font-bold">Cancel</button><button type="submit" className="neo-button flex-1 py-2 bg-neo-cyan dark:bg-neo-purple text-white font-bold">Save</button></div>
@@ -728,4 +728,4 @@ function CategoriesTab() {
       )}
     </div>
   )
-    }
+}
