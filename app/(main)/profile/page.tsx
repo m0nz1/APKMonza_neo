@@ -160,7 +160,7 @@ export default function ProfilePage() {
                 {/* Tombol Upgrade VIP — hanya muncul kalau belum VIP */}
                 {!profile?.is_vip && (
                   <a
-                    href={`https://wa.me/${ADMIN_WA_NUMBER}?text=Halo%20admin%2C%20saya%20ingin%20upgrade%20akun%20saya%20ke%20VIP.%20Email%3A%20${encodeURIComponent(user?.email || "")}`}
+                    href={`https://wa.me/6289696089274?text=Saya%20mau%20berlangganan%20VIP%20di%20APKMonza`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="neo-button px-4 py-2 bg-neo-yellow text-neo-black text-sm font-bold flex items-center gap-2"
