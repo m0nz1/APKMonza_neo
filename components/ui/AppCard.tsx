@@ -1,7 +1,7 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Star, Download, Crown } from "lucide-react"
 import { motion } from "framer-motion"
 import { App } from "@/types"
@@ -13,6 +13,8 @@ interface AppCardProps {
 }
 
 export function AppCard({ app, index = 0 }: AppCardProps) {
+  const [imgError, setImgError] = useState(false)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -24,13 +26,13 @@ export function AppCard({ app, index = 0 }: AppCardProps) {
           {/* Icon */}
           <div className="relative w-16 h-16 flex-shrink-0">
             <div className="w-16 h-16 bg-neo-cyan/20 dark:bg-neo-purple/20 border-2 border-neo-black rounded-xl flex items-center justify-center overflow-hidden">
-              {app.icon_url ? (
-                <Image
+              {app.icon_url && !imgError ? (
+                <img
                   src={app.icon_url}
                   alt={app.name}
-                  width={64}
-                  height={64}
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  onError={() => setImgError(true)}
                 />
               ) : (
                 <span className="text-2xl font-bold text-neo-cyan dark:text-neo-purple">
