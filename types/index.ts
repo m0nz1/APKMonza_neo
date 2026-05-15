@@ -57,3 +57,22 @@ export interface VipUser {
   expires_at: string
   created_at?: string
 }
+
+export interface MembershipPlan {
+  id: string
+  name: string
+  price: string
+  original_price: string | null
+  period: string
+  description: string
+  features: string[]
+  accent: "cyan" | "yellow" | "purple"
+  popular: boolean
+  is_active: boolean
+  sort_order: number
+  info_gangguan: string | null
+  discount_percent: number | null
+  is_free: boolean
+  created_at?: string
+  updated_at?: string
+}
