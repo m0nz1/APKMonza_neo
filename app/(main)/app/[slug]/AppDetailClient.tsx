@@ -21,7 +21,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
   const [isVip, setIsVip] = useState(false)
   const [showVipModal, setShowVipModal] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
-  const [category, setCategory] = useState<<Category | null>(null)
+  const [category, setCategory] = useState<Category | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
