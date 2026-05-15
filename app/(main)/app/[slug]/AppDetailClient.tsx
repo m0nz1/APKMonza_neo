@@ -48,11 +48,11 @@ export function AppDetailClient({ app, relatedApps }: Props) {
   const handleDownload = async () => {
     const downloadUrl = app.free_url
     if (!downloadUrl) {
-      toast.error("Link download tidak tersedia")
+      toast.error("Download link is not available")
       return
     }
 
-    // Kalau user login, catat ke history downloads
+    // If user is logged in, record to download history
     if (user) {
       await supabase.from("downloads").insert({
         user_id: user.id,
@@ -64,12 +64,12 @@ export function AppDetailClient({ app, relatedApps }: Props) {
     }
 
     window.open(downloadUrl, "_blank")
-    toast.success("Download dimulai!")
+    toast.success("Download started!")
   }
 
   const handleVipDownload = async () => {
     if (!user) {
-      toast.error("Silakan login terlebih dahulu")
+      toast.error("Please log in first")
       return
     }
     if (!isVip) {
@@ -84,14 +84,14 @@ export function AppDetailClient({ app, relatedApps }: Props) {
       is_vip: true,
     })
     window.open(app.vip_url!, "_blank")
-    toast.success("Download VIP dimulai!")
+    toast.success("VIP Download started!")
   }
 
   return (
     <main className="w-full max-w-2xl mx-auto py-6 space-y-4">
       {/* Back Button */}
       <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold hover:text-neo-cyan dark:hover:text-neo-purple transition-colors mx-1">
-        <ArrowLeft className="w-4 h-4" /> Kembali
+        <ArrowLeft className="w-4 h-4" /> Back
       </Link>
 
       {/* 1. Header Card */}
@@ -184,7 +184,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         </motion.div>
       )}
 
-      {/* 4. Deskripsi */}
+      {/* 4. Description */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -193,7 +193,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Info className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
-          Deskripsi
+          Description
         </h2>
         <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{app.description}</p>
       </motion.div>
@@ -217,7 +217,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         </div>
       </motion.div>
 
-      {/* 6. Link Download */}
+      {/* 6. Download Link */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -226,7 +226,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Download className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
-          Link Download
+          Download Link
         </h2>
         <div className="space-y-3">
           <motion.button
@@ -256,7 +256,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
               <div className="flex items-center gap-2 p-3 border-2 border-neo-black rounded-lg bg-neo-yellow/10">
                 <Crown className="w-4 h-4 text-neo-yellow flex-shrink-0" />
                 <p className="text-sm font-bold">
-                  User <span className="text-neo-yellow">VIP</span> mendapat link download langsung tanpa redirect
+                  <span className="text-neo-yellow">VIP</span> users get direct download links without redirects
                 </p>
               </div>
             </>
@@ -267,7 +267,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
               href="/auth/login"
               className="w-full neo-button px-4 py-3 bg-white dark:bg-neo-gray-dark text-sm font-bold flex items-center justify-center gap-2"
             >
-              Login dan berlangganan user VIP
+              Log in and subscribe to VIP
             </Link>
           )}
         </div>
@@ -281,7 +281,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
           transition={{ delay: 0.6 }}
           className="mx-1"
         >
-          <h2 className="text-xl font-black mb-4">Aplikasi Serupa</h2>
+          <h2 className="text-xl font-black mb-4">Similar Apps</h2>
           <div className="grid grid-cols-1 gap-4">
             {relatedApps.map((relatedApp, i) => (
               <AppCard key={relatedApp.id} app={relatedApp} index={i} />
@@ -301,16 +301,16 @@ export function AppDetailClient({ app, relatedApps }: Props) {
             <div className="w-16 h-16 bg-neo-yellow/20 border-2 border-neo-black rounded-full flex items-center justify-center mx-auto mb-4">
               <Crown className="w-8 h-8 text-neo-yellow" />
             </div>
-            <h2 className="text-2xl font-black mb-2">Upgrade ke VIP</h2>
+            <h2 className="text-2xl font-black mb-2">Upgrade to VIP</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Download link VIP dengan kecepatan tinggi dan tanpa iklan. Upgrade sekarang!
+              Get VIP download links with high speed and no ads. Upgrade now!
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowVipModal(false)}
                 className="flex-1 neo-button px-4 py-3 bg-gray-200 text-sm font-bold"
               >
-                Nanti
+                Later
               </button>
               <Link
                 href="/profile"
@@ -335,5 +335,5 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-                    }
-            
+      }
+                
