@@ -47,7 +47,7 @@ export default function RegisterPage() {
     }
 
     setLoading(false)
-    toast.success("Registrasi berhasil! Silakan cek email untuk verifikasi.")
+    toast.success("Registration successful! Please check your email for verification.")
     router.push("/auth/login")
   }
 
@@ -62,10 +62,10 @@ export default function RegisterPage() {
           <Download className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-black">
-          <span className="text-neo-cyan dark:text-neo-purple">Neo</span>
-          <span className="text-neo-yellow">Store</span>
+          <span className="text-neo-cyan dark:text-neo-purple">APK</span>
+          <span className="text-neo-yellow">Monza</span>
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">Buat akun baru</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">Create a new account</p>
       </div>
 
       <div className="neo-card bg-white dark:bg-neo-gray-dark p-8">
@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Min. 6 karakter"
+                placeholder="Min. 6 characters"
                 required
                 minLength={6}
                 className="neo-input w-full pl-12 pr-12 py-3"
@@ -129,13 +129,13 @@ export default function RegisterPage() {
             disabled={loading}
             className="neo-button w-full py-3 bg-neo-cyan dark:bg-neo-purple text-white font-black text-lg disabled:opacity-50"
           >
-            {loading ? "Loading..." : "Daftar"}
+            {loading ? "Loading..." : "Register"}
           </motion.button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Sudah punya akun?{" "}
+            Already have an account?{" "}
             <Link href="/auth/login" className="text-neo-cyan dark:text-neo-purple font-bold hover:underline">
               Login
             </Link>
