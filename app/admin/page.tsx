@@ -202,7 +202,7 @@ function AppsTab() {
   const [searchQuery, setSearchQuery] = useState("")
   const supabase = createClient()
 
-  const emptyApp: Partial<<App> = {
+  const emptyApp: Partial<App> = {
     name: "", slug: "", version: "", developer: "",
     mod_feature: "", mod_feature_full: "", description: "",
     package_name: "", size: "", free_url: "", vip_url: "",
