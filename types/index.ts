@@ -36,6 +36,7 @@ export interface User {
   username: string
   avatar_url?: string
   is_vip: boolean
+  vip_plan_id?: string | null
   vip_expires_at?: string
   role: "user" | "admin"
   created_at?: string

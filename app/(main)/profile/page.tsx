@@ -88,12 +88,8 @@ export default function ProfilePage() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Profile Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="neo-card bg-white dark:bg-neo-gray-dark p-6 md:p-8"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        className="neo-card bg-white dark:bg-neo-gray-dark p-6 md:p-8">
         <div className="flex flex-col items-center text-center">
           <div className="relative mb-4">
             <div className="w-24 h-24 bg-neo-cyan/20 dark:bg-neo-purple/20 border-3 border-neo-black rounded-full flex items-center justify-center">
@@ -112,26 +108,16 @@ export default function ProfilePage() {
 
           {isEditing ? (
             <div className="w-full max-w-sm space-y-3">
-              <input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="neo-input w-full px-4 py-2 text-center"
-                placeholder="Username"
-              />
+              <input value={username} onChange={(e) => setUsername(e.target.value)}
+                className="neo-input w-full px-4 py-2 text-center" placeholder="Username" />
               <div className="flex gap-2 justify-center">
-                <button onClick={handleUpdateProfile} className="neo-button px-4 py-2 bg-neo-cyan dark:bg-neo-purple text-white text-sm">
-                  Save
-                </button>
-                <button onClick={() => setIsEditing(false)} className="neo-button px-4 py-2 bg-gray-200 text-sm">
-                  Cancel
-                </button>
+                <button onClick={handleUpdateProfile} className="neo-button px-4 py-2 bg-neo-cyan dark:bg-neo-purple text-white text-sm">Save</button>
+                <button onClick={() => setIsEditing(false)} className="neo-button px-4 py-2 bg-gray-200 text-sm">Cancel</button>
               </div>
             </div>
           ) : (
             <>
-              <h1 className="text-2xl font-black mb-1">
-                {profile?.username || user?.email?.split("@")[0]}
-              </h1>
+              <h1 className="text-2xl font-black mb-1">{profile?.username || user?.email?.split("@")[0]}</h1>
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{user?.email}</p>
 
               <div className="flex items-center gap-3 mb-4">
@@ -155,27 +141,20 @@ export default function ProfilePage() {
               )}
 
               <div className="flex flex-wrap gap-2 justify-center">
-                {/* VIP Upgrade button — redirects to membership page */}
                 {!profile?.is_vip && (
-                  <Link
-                    href="/membership"
-                    className="neo-button px-4 py-2 bg-neo-yellow text-neo-black text-sm font-bold flex items-center gap-2"
-                  >
+                  <Link href="/membership"
+                    className="neo-button px-4 py-2 bg-neo-yellow text-neo-black text-sm font-bold flex items-center gap-2">
                     <Crown className="w-4 h-4" /> Upgrade to VIP
                     <ArrowUpRight className="w-3 h-3" />
                   </Link>
                 )}
 
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="neo-button px-4 py-2 bg-white dark:bg-neo-gray-dark text-sm flex items-center gap-2"
-                >
+                <button onClick={() => setIsEditing(true)}
+                  className="neo-button px-4 py-2 bg-white dark:bg-neo-gray-dark text-sm flex items-center gap-2">
                   <Edit3 className="w-4 h-4" /> Edit Profile
                 </button>
-                <button
-                  onClick={handleLogout}
-                  className="neo-button px-4 py-2 bg-red-500 text-white text-sm flex items-center gap-2"
-                >
+                <button onClick={handleLogout}
+                  className="neo-button px-4 py-2 bg-red-500 text-white text-sm flex items-center gap-2">
                   <LogOut className="w-4 h-4" /> Logout
                 </button>
               </div>
@@ -184,13 +163,8 @@ export default function ProfilePage() {
         </div>
       </motion.div>
 
-      {/* Download History */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="neo-card bg-white dark:bg-neo-gray-dark p-6"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+        className="neo-card bg-white dark:bg-neo-gray-dark p-6">
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Download className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
           Download History
@@ -207,9 +181,7 @@ export default function ProfilePage() {
                   <p className="font-bold text-sm truncate">{dl.app_name}</p>
                   <p className="text-xs text-gray-500">{formatDate(dl.created_at)}</p>
                 </div>
-                {dl.is_vip && (
-                  <span className="neo-badge bg-neo-yellow text-xs">VIP</span>
-                )}
+                {dl.is_vip && <span className="neo-badge bg-neo-yellow text-xs">VIP</span>}
               </div>
             ))}
           </div>
