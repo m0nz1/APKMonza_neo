@@ -21,7 +21,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
   const [isVip, setIsVip] = useState(false)
   const [showVipModal, setShowVipModal] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
-  const [category, setCategory] = useState<Category | null>(null)
+  const [category, setCategory] = useState<<Category | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -52,7 +52,6 @@ export function AppDetailClient({ app, relatedApps }: Props) {
       return
     }
 
-    // If user is logged in, record to download history
     if (user) {
       await supabase.from("downloads").insert({
         user_id: user.id,
@@ -136,7 +135,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         </div>
       </motion.div>
 
-      {/* 2. Screenshots */}
+      {/* 2. Screenshots - PAKE <img> BIASA SUPAYA EXTERNAL URL TIDAK DI-BLOCK */}
       {app.screenshots && app.screenshots.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -154,7 +153,20 @@ export function AppDetailClient({ app, relatedApps }: Props) {
                   activeImage === i ? "border-neo-cyan dark:border-neo-purple shadow-neo-cyan" : "border-neo-black"
                 }`}
               >
-                <Image src={screenshot} alt={`Screenshot ${i + 1}`} width={192} height={320} className="w-full h-full object-cover" />
+                {/* GANTI Image jadi img */}
+                <img
+                  src={screenshot}
+                  alt={`Screenshot ${i + 1}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    const parent = (e.target as HTMLImageElement).parentElement;
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 text-sm font-medium">Failed to load</div>';
+                    }
+                  }}
+                />
               </button>
             ))}
           </div>
@@ -335,5 +347,5 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-      }
-                
+            }
+            
