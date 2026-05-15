@@ -61,8 +61,8 @@ export default function LoginPage() {
           <Download className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-black">
-          <span className="text-neo-cyan dark:text-neo-purple">Neo</span>
-          <span className="text-neo-yellow">Store</span>
+          <span className="text-neo-cyan dark:text-neo-purple">APK</span>
+          <span className="text-neo-yellow">Monza</span>
         </h1>
         <p className="text-gray-500 dark:text-gray-400 mt-2">Login to your account</p>
       </div>
