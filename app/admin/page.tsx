@@ -1,27 +1,51 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   LayoutDashboard, Package, Users, Tags, ArrowLeft, Shield,
   Plus, Pencil, Trash2, Search, Crown, UserCheck, UserX,
   Image as ImageIcon, BarChart3, TrendingUp,
-  Download, X, Star, Link as LinkIcon, Trash
+  Download, X, Star, Link as LinkIcon, Trash,
+  CreditCard, Tag, AlertTriangle, GripVertical, Zap, Loader2,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { App } from "@/types"
+import { App, MembershipPlan } from "@/types"
 import { toast } from "sonner"
 import { generateSlug, formatDate } from "@/lib/utils"
 
-type Tab = "dashboard" | "apps" | "users" | "categories"
+type Tab = "dashboard" | "apps" | "users" | "categories" | "membership"
 
 const tabs = [
   { id: "dashboard" as Tab, label: "Dashboard", icon: LayoutDashboard },
   { id: "apps" as Tab, label: "Apps", icon: Package },
   { id: "users" as Tab, label: "Users", icon: Users },
   { id: "categories" as Tab, label: "Categories", icon: Tags },
+  { id: "membership" as Tab, label: "Membership", icon: CreditCard },
 ]
+
+const ACCENT_OPTIONS = [
+  { value: "cyan", label: "Cyan" },
+  { value: "yellow", label: "Yellow" },
+  { value: "purple", label: "Purple" },
+]
+
+const EMPTY_PLAN: Partial<MembershipPlan> = {
+  name: "",
+  price: "",
+  original_price: null,
+  period: "",
+  description: "",
+  features: [],
+  accent: "cyan",
+  popular: false,
+  is_active: true,
+  sort_order: 0,
+  info_gangguan: null,
+  discount_percent: null,
+  is_free: false,
+}
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard")
@@ -53,7 +77,7 @@ export default function AdminPage() {
       setChecking(false)
     }
     checkAdmin()
-  }, [])
+  }, [supabase])
 
   if (checking) {
     return (
@@ -71,6 +95,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-neo-gray-light dark:bg-neo-black">
       <div className="flex">
+        {/* Sidebar Desktop */}
         <aside className="w-64 bg-white dark:bg-neo-gray-dark border-r-2 border-neo-black min-h-screen p-6 hidden lg:block sticky top-0">
           <Link href="/" className="flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-neo-cyan dark:bg-neo-purple border-2 border-neo-black rounded-lg shadow-neo flex items-center justify-center">
@@ -99,6 +124,7 @@ export default function AdminPage() {
           </nav>
         </aside>
 
+        {/* Mobile Nav */}
         <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-neo-gray-dark border-b-2 border-neo-black p-2 flex gap-1 overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon
@@ -113,6 +139,7 @@ export default function AdminPage() {
           })}
         </div>
 
+        {/* Main Content */}
         <main className="flex-1 p-6 lg:p-8 lg:pt-8 pt-20">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
@@ -120,6 +147,7 @@ export default function AdminPage() {
               {activeTab === "apps" && <AppsTab />}
               {activeTab === "users" && <UsersTab />}
               {activeTab === "categories" && <CategoriesTab />}
+              {activeTab === "membership" && <MembershipTab />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -128,6 +156,7 @@ export default function AdminPage() {
   )
 }
 
+/* ─────────────── DASHBOARD ─────────────── */
 function DashboardTab() {
   const [stats, setStats] = useState({ apps: 0, users: 0, downloads: 0, vip: 0 })
   const [recentDownloads, setRecentDownloads] = useState<any[]>([])
@@ -144,7 +173,7 @@ function DashboardTab() {
       setRecentDownloads(recent || [])
     }
     fetchStats()
-  }, [])
+  }, [supabase])
 
   const statCards = [
     { label: "Total Apps", value: stats.apps, icon: Package, color: "bg-neo-cyan" },
@@ -194,6 +223,7 @@ function DashboardTab() {
   )
 }
 
+/* ─────────────── APPS ─────────────── */
 function AppsTab() {
   const [apps, setApps] = useState<App[]>([])
   const [categories, setCategories] = useState<any[]>([])
@@ -256,41 +286,21 @@ function AppsTab() {
     fetchApps()
   }
 
-  const openEdit = (app: App) => { 
-    setEditingApp(app); 
-    setFormData(app); 
-    setShowModal(true) 
-  }
-  
-  const openCreate = () => { 
-    setEditingApp(null); 
-    setFormData(emptyApp); 
-    setScreenshotUrl("");
-    setShowModal(true) 
-  }
+  const openEdit = (app: App) => { setEditingApp(app); setFormData(app); setShowModal(true) }
+  const openCreate = () => { setEditingApp(null); setFormData(emptyApp); setScreenshotUrl(""); setShowModal(true) }
 
   const addScreenshot = () => {
-    if (!screenshotUrl.trim()) {
-      toast.error("Please enter a screenshot URL")
-      return
-    }
-    if (!screenshotUrl.match(/^https?:\/\/.+/)) {
-      toast.error("Please enter a valid URL (https://...)")
-      return
-    }
+    if (!screenshotUrl.trim()) { toast.error("Please enter a screenshot URL"); return }
+    if (!screenshotUrl.match(/^https?:\/\/.+/)) { toast.error("Please enter a valid URL"); return }
     const currentScreenshots = formData.screenshots || []
-    if (currentScreenshots.includes(screenshotUrl.trim())) {
-      toast.error("This screenshot URL already exists")
-      return
-    }
+    if (currentScreenshots.includes(screenshotUrl.trim())) { toast.error("This screenshot URL already exists"); return }
     setFormData({ ...formData, screenshots: [...currentScreenshots, screenshotUrl.trim()] })
     setScreenshotUrl("")
     toast.success("Screenshot added!")
   }
 
   const removeScreenshot = (index: number) => {
-    const currentScreenshots = formData.screenshots || []
-    const newScreenshots = currentScreenshots.filter((_, i) => i !== index)
+    const newScreenshots = (formData.screenshots || []).filter((_, i) => i !== index)
     setFormData({ ...formData, screenshots: newScreenshots })
     toast.success("Screenshot removed!")
   }
@@ -333,7 +343,7 @@ function AppsTab() {
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{app.version}</td>
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{categories.find((c) => c.id === app.category_id)?.name || "-"}</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleRecommended(app)} className={`neo-button p-1.5 ${app.is_recommended ? "bg-neo-yellow text-neo-black" : "bg-gray-200 text-gray-500"}`} title={app.is_recommended ? "Remove from recommendation" : "Add to recommendation"}>
+                    <button onClick={() => toggleRecommended(app)} className={`neo-button p-1.5 ${app.is_recommended ? "bg-neo-yellow text-neo-black" : "bg-gray-200 text-gray-500"}`}>
                       <Star className={`w-4 h-4 ${app.is_recommended ? "fill-current" : ""}`} />
                     </button>
                   </td>
@@ -367,99 +377,34 @@ function AppsTab() {
                 <div><label className="block font-bold text-sm mb-1">Package Name</label><input value={formData.package_name || ""} onChange={(e) => setFormData({ ...formData, package_name: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="com.example.app" /></div>
                 <div><label className="block font-bold text-sm mb-1">Size</label><input value={formData.size || ""} onChange={(e) => setFormData({ ...formData, size: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="50 MB" /></div>
                 <div><label className="block font-bold text-sm mb-1">Icon URL</label><input value={formData.icon_url || ""} onChange={(e) => setFormData({ ...formData, icon_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
-                <div>
-                  <label className="block font-bold text-sm mb-1 flex items-center gap-1">
-                    <Star className="w-3 h-3 text-neo-yellow fill-neo-yellow" /> Rating
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="5"
-                    value={formData.rating ?? 4.5}
-                    onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
-                    className="neo-input w-full px-3 py-2"
-                    placeholder="4.5"
-    />
-                </div>
-                <div>
-                  <label className="block font-bold text-sm mb-1 flex items-center gap-1">
-                    <Download className="w-3 h-3 text-neo-cyan" /> Download Count
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.download_count ?? 0}
-                    onChange={(e) => setFormData({ ...formData, download_count: parseInt(e.target.value) })}
-                    className="neo-input w-full px-3 py-2"
-                    placeholder="0"
-                  />
-                </div>
+                <div><label className="block font-bold text-sm mb-1 flex items-center gap-1"><Star className="w-3 h-3 text-neo-yellow fill-neo-yellow" /> Rating</label><input type="number" step="0.1" min="0" max="5" value={formData.rating ?? 4.5} onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })} className="neo-input w-full px-3 py-2" placeholder="4.5" /></div>
+                <div><label className="block font-bold text-sm mb-1 flex items-center gap-1"><Download className="w-3 h-3 text-neo-cyan" /> Download Count</label><input type="number" min="0" value={formData.download_count ?? 0} onChange={(e) => setFormData({ ...formData, download_count: parseInt(e.target.value) })} className="neo-input w-full px-3 py-2" placeholder="0" /></div>
               </div>
 
-              {/* Screenshots Section */}
               <div className="border-2 border-neo-black rounded-lg p-4 bg-neo-gray-light dark:bg-neo-gray-dark space-y-3">
-                <label className="block font-bold text-sm flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-neo-cyan dark:text-neo-purple" />
-                  Screenshots
-                </label>
-                
+                <label className="block font-bold text-sm flex items-center gap-2"><ImageIcon className="w-4 h-4 text-neo-cyan dark:text-neo-purple" /> Screenshots</label>
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
                     <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={screenshotUrl}
-                      onChange={(e) => setScreenshotUrl(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addScreenshot())}
-                      placeholder="Paste image URL (e.g. https://i.ibb.co/...)"
-                      className="neo-input w-full pl-10 pr-3 py-2 text-sm"
-                    />
+                    <input type="text" value={screenshotUrl} onChange={(e) => setScreenshotUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addScreenshot())} placeholder="Paste image URL (e.g. https://i.ibb.co/...)" className="neo-input w-full pl-10 pr-3 py-2 text-sm" />
                   </div>
-                  <motion.button
-                    type="button"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={addScreenshot}
-                    className="neo-button px-4 py-2 bg-neo-cyan dark:bg-neo-purple text-white text-sm font-bold flex items-center gap-1"
-                  >
-                    <Plus className="w-4 h-4" /> Add
-                  </motion.button>
+                  <motion.button type="button" whileTap={{ scale: 0.95 }} onClick={addScreenshot} className="neo-button px-4 py-2 bg-neo-cyan dark:bg-neo-purple text-white text-sm font-bold flex items-center gap-1"><Plus className="w-4 h-4" /> Add</motion.button>
                 </div>
-
-                {/* Preview Grid */}
                 {formData.screenshots && formData.screenshots.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {formData.screenshots.map((url, index) => (
                       <div key={index} className="relative group">
                         <div className="aspect-[9/16] rounded-lg border-2 border-neo-black overflow-hidden bg-white dark:bg-neo-gray-dark">
-                          <img
-                            src={url}
-                            alt={`Screenshot ${index + 1}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='10'%3EBroken Link%3C/text%3E%3C/svg%3E"
-                            }}
-                          />
+                          <img src={url} alt={`Screenshot ${index + 1}`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='10'%3EBroken Link%3C/text%3E%3C/svg%3E" }} />
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeScreenshot(index)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full border-2 border-neo-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-neo"
-                          title="Remove screenshot"
-                        >
-                          <Trash className="w-3 h-3" />
-                        </button>
+                        <button type="button" onClick={() => removeScreenshot(index)} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full border-2 border-neo-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-neo"><Trash className="w-3 h-3" /></button>
                         <p className="text-xs text-gray-500 mt-1 truncate px-1">Screenshot {index + 1}</p>
                       </div>
                     ))}
                   </div>
                 )}
-
                 {(!formData.screenshots || formData.screenshots.length === 0) && (
-                  <div className="text-center py-6 text-gray-500 text-sm font-medium border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-                    <ImageIcon className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                    No screenshots added yet. Paste a URL above and click Add.
-                  </div>
+                  <div className="text-center py-6 text-gray-500 text-sm font-medium border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg"><ImageIcon className="w-8 h-8 mx-auto mb-2 text-gray-400" />No screenshots added yet.</div>
                 )}
               </div>
 
@@ -486,6 +431,7 @@ function AppsTab() {
   )
 }
 
+/* ─────────────── USERS ─────────────── */
 function UsersTab() {
   const [users, setUsers] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -512,157 +458,55 @@ function UsersTab() {
     toast.success(`Role updated to ${newRole}!`); fetchUsers()
   }
 
-  const filtered = users.filter((u) => 
-    u.email?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    u.username?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filtered = users.filter((u) => u.email?.toLowerCase().includes(searchQuery.toLowerCase()) || u.username?.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl md:text-3xl font-black flex items-center gap-2">
-        <Users className="w-7 h-7 md:w-8 md:h-8 text-neo-cyan dark:text-neo-purple" /> 
-        Manage Users
-      </h1>
-      
+      <h1 className="text-2xl md:text-3xl font-black flex items-center gap-2"><Users className="w-7 h-7 md:w-8 md:h-8 text-neo-cyan dark:text-neo-purple" /> Manage Users</h1>
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input 
-          type="text" 
-          value={searchQuery} 
-          onChange={(e) => setSearchQuery(e.target.value)} 
-          placeholder="Search users..." 
-          className="neo-input w-full pl-12 pr-4 py-3 text-sm md:text-base" 
-        />
+        <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search users..." className="neo-input w-full pl-12 pr-4 py-3 text-sm md:text-base" />
       </div>
-
-      {/* Desktop Table View */}
       <div className="hidden md:block neo-card bg-white dark:bg-neo-gray-dark overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b-2 border-neo-black bg-neo-gray-light dark:bg-neo-gray-dark">
-                <th className="text-left px-4 py-3 font-black text-sm">User</th>
-                <th className="text-left px-4 py-3 font-black text-sm">Role</th>
-                <th className="text-left px-4 py-3 font-black text-sm">VIP</th>
-                <th className="text-left px-4 py-3 font-black text-sm">Actions</th>
-              </tr>
-            </thead>
+            <thead><tr className="border-b-2 border-neo-black bg-neo-gray-light dark:bg-neo-gray-dark"><th className="text-left px-4 py-3 font-black text-sm">User</th><th className="text-left px-4 py-3 font-black text-sm">Role</th><th className="text-left px-4 py-3 font-black text-sm">VIP</th><th className="text-left px-4 py-3 font-black text-sm">Actions</th></tr></thead>
             <tbody>
               {filtered.map((user) => (
                 <tr key={user.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-neo-cyan/5 dark:hover:bg-neo-purple/10">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center flex-shrink-0">
-                        <span className="font-bold text-sm">{user.username?.charAt(0)?.toUpperCase() || "U"}</span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-bold text-sm truncate">{user.username || "-"}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`neo-badge text-xs ${user.role === "admin" ? "bg-neo-purple text-white" : "bg-gray-200"}`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {user.is_vip ? (
-                      <span className="neo-badge bg-neo-yellow text-neo-black text-xs flex items-center gap-1 w-fit">
-                        <Crown className="w-3 h-3" /> VIP
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-500">Free</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 flex-wrap">
-                      <motion.button 
-                        whileTap={{ scale: 0.95 }} 
-                        onClick={() => toggleVip(user.id, user.is_vip)} 
-                        className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}
-                      >
-                        {user.is_vip ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
-                        {user.is_vip ? "Remove VIP" : "Make VIP"}
-                      </motion.button>
-                      <motion.button 
-                        whileTap={{ scale: 0.95 }} 
-                        onClick={() => toggleAdmin(user.id, user.role)} 
-                        className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}
-                      >
-                        <Shield className="w-3 h-3" />
-                        {user.role === "admin" ? "Remove Admin" : "Make Admin"}
-                      </motion.button>
-                    </div>
-                  </td>
+                  <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-10 h-10 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center flex-shrink-0"><span className="font-bold text-sm">{user.username?.charAt(0)?.toUpperCase() || "U"}</span></div><div className="min-w-0"><p className="font-bold text-sm truncate">{user.username || "-"}</p><p className="text-xs text-gray-500 truncate">{user.email}</p></div></div></td>
+                  <td className="px-4 py-3"><span className={`neo-badge text-xs ${user.role === "admin" ? "bg-neo-purple text-white" : "bg-gray-200"}`}>{user.role}</span></td>
+                  <td className="px-4 py-3">{user.is_vip ? <span className="neo-badge bg-neo-yellow text-neo-black text-xs flex items-center gap-1 w-fit"><Crown className="w-3 h-3" /> VIP</span> : <span className="text-xs text-gray-500">Free</span>}</td>
+                  <td className="px-4 py-3"><div className="flex gap-2 flex-wrap"><motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleVip(user.id, user.is_vip)} className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}>{user.is_vip ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}{user.is_vip ? "Remove VIP" : "Make VIP"}</motion.button><motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleAdmin(user.id, user.role)} className={`neo-button px-3 py-1.5 text-xs font-bold flex items-center gap-1 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}><Shield className="w-3 h-3" />{user.role === "admin" ? "Remove Admin" : "Make Admin"}</motion.button></div></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
-
-      {/* Mobile Card View */}
       <div className="md:hidden space-y-3">
         {filtered.map((user) => (
-          <motion.div 
-            key={user.id} 
-            initial={{ opacity: 0, y: 10 }} 
-            animate={{ opacity: 1, y: 0 }}
-            className="neo-card bg-white dark:bg-neo-gray-dark p-4 space-y-3"
-          >
+          <motion.div key={user.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="neo-card bg-white dark:bg-neo-gray-dark p-4 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="w-12 h-12 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center flex-shrink-0">
-                <span className="font-bold text-lg">{user.username?.charAt(0)?.toUpperCase() || "U"}</span>
-              </div>
+              <div className="w-12 h-12 bg-neo-cyan/20 rounded-full border-2 border-neo-black flex items-center justify-center flex-shrink-0"><span className="font-bold text-lg">{user.username?.charAt(0)?.toUpperCase() || "U"}</span></div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-bold text-base truncate">{user.username || "-"}</p>
-                  {user.role === "admin" && (
-                    <span className="neo-badge text-xs bg-neo-purple text-white px-2 py-0.5">admin</span>
-                  )}
-                  {user.is_vip && (
-                    <span className="neo-badge text-xs bg-neo-yellow text-neo-black px-2 py-0.5 flex items-center gap-1">
-                      <Crown className="w-3 h-3" /> VIP
-                    </span>
-                  )}
-                </div>
+                <div className="flex items-center gap-2 flex-wrap"><p className="font-bold text-base truncate">{user.username || "-"}</p>{user.role === "admin" && <span className="neo-badge text-xs bg-neo-purple text-white px-2 py-0.5">admin</span>}{user.is_vip && <span className="neo-badge text-xs bg-neo-yellow text-neo-black px-2 py-0.5 flex items-center gap-1"><Crown className="w-3 h-3" /> VIP</span>}</div>
                 <p className="text-sm text-gray-500 truncate mt-0.5">{user.email}</p>
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-2 pt-1">
-              <motion.button 
-                whileTap={{ scale: 0.95 }} 
-                onClick={() => toggleVip(user.id, user.is_vip)} 
-                className={`neo-button py-2.5 text-sm font-bold flex items-center justify-center gap-1.5 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}
-              >
-                {user.is_vip ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
-                {user.is_vip ? "Remove VIP" : "Make VIP"}
-              </motion.button>
-              
-              <motion.button 
-                whileTap={{ scale: 0.95 }} 
-                onClick={() => toggleAdmin(user.id, user.role)} 
-                className={`neo-button py-2.5 text-sm font-bold flex items-center justify-center gap-1.5 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}
-              >
-                <Shield className="w-4 h-4" />
-                {user.role === "admin" ? "Remove Admin" : "Make Admin"}
-              </motion.button>
+              <motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleVip(user.id, user.is_vip)} className={`neo-button py-2.5 text-sm font-bold flex items-center justify-center gap-1.5 ${user.is_vip ? "bg-red-500 text-white" : "bg-neo-yellow text-neo-black"}`}>{user.is_vip ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}{user.is_vip ? "Remove VIP" : "Make VIP"}</motion.button>
+              <motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleAdmin(user.id, user.role)} className={`neo-button py-2.5 text-sm font-bold flex items-center justify-center gap-1.5 ${user.role === "admin" ? "bg-orange-500 text-white" : "bg-neo-cyan text-white"}`}><Shield className="w-4 h-4" />{user.role === "admin" ? "Remove Admin" : "Make Admin"}</motion.button>
             </div>
           </motion.div>
         ))}
       </div>
-
-      {filtered.length === 0 && (
-        <div className="text-center py-12 text-gray-500 font-medium">
-          No users found matching your search.
-        </div>
-      )}
+      {filtered.length === 0 && <div className="text-center py-12 text-gray-500 font-medium">No users found matching your search.</div>}
     </div>
   )
 }
 
+/* ─────────────── CATEGORIES ─────────────── */
 function CategoriesTab() {
   const [categories, setCategories] = useState<any[]>([])
   const [showModal, setShowModal] = useState(false)
@@ -718,11 +562,456 @@ function CategoriesTab() {
           <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="neo-card bg-white dark:bg-neo-gray-dark p-6 max-w-md w-full">
             <div className="flex items-center justify-between mb-4"><h2 className="text-xl font-black">{editingCat ? "Edit" : "Add"} Category</h2><button onClick={() => setShowModal(false)} className="neo-button p-2"><X className="w-4 h-4" /></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-                           <div><label className="block font-bold text-sm mb-1">Name</label><input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="neo-input w-full px-3 py-2" /></div>
+              <div><label className="block font-bold text-sm mb-1">Name</label><input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="neo-input w-full px-3 py-2" /></div>
               <div><label className="block font-bold text-sm mb-1">Icon (lucide name)</label><input value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="gamepad2" /></div>
               <div><label className="block font-bold text-sm mb-1">Color</label><div className="flex gap-2"><input type="color" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="w-12 h-10 border-2 border-neo-black rounded-lg cursor-pointer" /><input value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="neo-input flex-1 px-3 py-2" /></div></div>
               <div className="flex gap-3 pt-2"><button type="button" onClick={() => setShowModal(false)} className="neo-button flex-1 py-2 bg-gray-200 font-bold">Cancel</button><button type="submit" className="neo-button flex-1 py-2 bg-neo-cyan dark:bg-neo-purple text-white font-bold">Save</button></div>
             </form>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─────────────── MEMBERSHIP ─────────────── */
+function MembershipTab() {
+  const [plans, setPlans] = useState<MembershipPlan[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [editingPlan, setEditingPlan] = useState<Partial<MembershipPlan> | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const supabase = createClient()
+
+  const fetchPlans = useCallback(async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from("membership_plans")
+      .select("*")
+      .order("sort_order", { ascending: true })
+
+    if (error) {
+      toast.error("Failed to load membership plans")
+      console.error(error)
+    } else {
+      setPlans(data || [])
+    }
+    setLoading(false)
+  }, [supabase])
+
+  useEffect(() => {
+    fetchPlans()
+  }, [fetchPlans])
+
+  const handleSave = async () => {
+    if (!editingPlan) return
+    setSaving(true)
+
+    const planData = {
+      ...editingPlan,
+      features: editingPlan.features || [],
+    }
+
+    if (planData.id) {
+      const { error } = await supabase
+        .from("membership_plans")
+        .update(planData)
+        .eq("id", planData.id)
+
+      if (error) {
+        toast.error("Failed to update plan")
+        console.error(error)
+      } else {
+        toast.success("Plan updated successfully")
+        fetchPlans()
+        setIsModalOpen(false)
+        setEditingPlan(null)
+      }
+    } else {
+      const { error } = await supabase
+        .from("membership_plans")
+        .insert(planData)
+
+      if (error) {
+        toast.error("Failed to create plan")
+        console.error(error)
+      } else {
+        toast.success("Plan created successfully")
+        fetchPlans()
+        setIsModalOpen(false)
+        setEditingPlan(null)
+      }
+    }
+
+    setSaving(false)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this plan?")) return
+
+    const { error } = await supabase.from("membership_plans").delete().eq("id", id)
+
+    if (error) {
+      toast.error("Failed to delete plan")
+    } else {
+      toast.success("Plan deleted")
+      fetchPlans()
+    }
+  }
+
+  const openEdit = (plan: MembershipPlan) => {
+    setEditingPlan({ ...plan })
+    setIsModalOpen(true)
+  }
+
+  const openCreate = () => {
+    const maxOrder = plans.length > 0 ? Math.max(...plans.map((p) => p.sort_order)) + 1 : 0
+    setEditingPlan({ ...EMPTY_PLAN, sort_order: maxOrder })
+    setIsModalOpen(true)
+  }
+
+  const updateFeature = (index: number, value: string) => {
+    if (!editingPlan) return
+    const newFeatures = [...(editingPlan.features || [])]
+    newFeatures[index] = value
+    setEditingPlan({ ...editingPlan, features: newFeatures })
+  }
+
+  const addFeature = () => {
+    if (!editingPlan) return
+    setEditingPlan({ ...editingPlan, features: [...(editingPlan.features || []), ""] })
+  }
+
+  const removeFeature = (index: number) => {
+    if (!editingPlan) return
+    const newFeatures = (editingPlan.features || []).filter((_, i) => i !== index)
+    setEditingPlan({ ...editingPlan, features: newFeatures })
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-neo-cyan" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-neo-yellow border-2 border-neo-black rounded-lg flex items-center justify-center shadow-neo">
+            <Crown className="w-5 h-5 text-neo-black" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black dark:text-white">Membership Plans</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Manage pricing, discounts & maintenance info</p>
+          </div>
+        </div>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={openCreate}
+          className="neo-button px-4 py-2 bg-neo-cyan text-white font-bold flex items-center gap-2 border-2 border-neo-black"
+        >
+          <Plus className="w-4 h-4" /> Add Plan
+        </motion.button>
+      </div>
+
+      {/* Plans List */}
+      <div className="space-y-3">
+        {plans.map((plan, index) => (
+          <motion.div
+            key={plan.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05 }}
+            className={`
+              neo-card p-4 flex items-center gap-4
+              ${plan.is_active ? "bg-white dark:bg-neo-gray-dark" : "bg-gray-100 dark:bg-gray-800 opacity-60"}
+              border-2 border-neo-black
+            `}
+          >
+            <div className="flex-shrink-0 text-gray-400">
+              <GripVertical className="w-5 h-5" />
+            </div>
+
+            <div className={`
+              flex-shrink-0 w-10 h-10 rounded-lg border-2 border-neo-black flex items-center justify-center
+              ${plan.accent === 'yellow' ? 'bg-neo-yellow' : plan.accent === 'purple' ? 'bg-neo-purple' : 'bg-neo-cyan'}
+            `}>
+              {plan.is_free ? (
+                <Shield className="w-5 h-5 text-white" />
+              ) : (
+                <Crown className="w-5 h-5 text-white" />
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-black dark:text-white truncate">{plan.name}</h3>
+                {plan.popular && (
+                  <span className="px-2 py-0.5 bg-neo-yellow text-neo-black text-xs font-black rounded-full border border-neo-black">
+                    POPULAR
+                  </span>
+                )}
+                {plan.info_gangguan && (
+                  <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded-full border border-red-400 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> {plan.info_gangguan}
+                  </span>
+                )}
+                {!plan.is_active && (
+                  <span className="px-2 py-0.5 bg-gray-200 text-gray-600 text-xs font-bold rounded-full border border-gray-400">
+                    INACTIVE
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3 mt-1 text-sm flex-wrap">
+                <span className="font-bold text-neo-black dark:text-white">{plan.price}</span>
+                {plan.original_price && (
+                  <span className="text-gray-400 line-through">{plan.original_price}</span>
+                )}
+                {plan.discount_percent && plan.discount_percent > 0 && (
+                  <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs font-black rounded border border-red-400 flex items-center gap-1">
+                    <Tag className="w-3 h-3" /> -{plan.discount_percent}%
+                  </span>
+                )}
+                <span className="text-gray-500">{plan.period}</span>
+                <span className="text-gray-400">•</span>
+                <span className="text-gray-500 truncate">{plan.description}</span>
+                <span className="text-gray-400">•</span>
+                <span className="text-xs text-gray-400">{plan.features.length} features</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => openEdit(plan)}
+                className="neo-button px-3 py-2 bg-neo-yellow text-neo-black text-xs font-black border-2 border-neo-black"
+              >
+                <Pencil className="w-3 h-3 inline mr-1" /> Edit
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleDelete(plan.id)}
+                className="neo-button p-2 bg-red-100 text-red-600 border-2 border-red-400"
+              >
+                <Trash2 className="w-4 h-4" />
+              </motion.button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {plans.length === 0 && (
+        <div className="text-center py-12 neo-card bg-white dark:bg-neo-gray-dark border-2 border-dashed border-gray-300 dark:border-gray-600">
+          <Crown className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+          <p className="font-bold text-gray-500">No membership plans yet</p>
+          <p className="text-sm text-gray-400 mt-1">Click "Add Plan" to create your first plan</p>
+        </div>
+      )}
+
+      {/* Edit/Create Modal */}
+      {isModalOpen && editingPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="neo-card bg-white dark:bg-neo-gray-dark w-full max-w-lg max-h-[90vh] overflow-y-auto border-3 border-neo-black"
+          >
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-black dark:text-white">
+                  {editingPlan.id ? "Edit Plan" : "New Plan"}
+                </h2>
+                <button
+                  onClick={() => { setIsModalOpen(false); setEditingPlan(null) }}
+                  className="neo-button p-2 bg-gray-100 dark:bg-neo-gray-dark border-2 border-neo-black"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Plan Name</label>
+                  <input
+                    type="text"
+                    value={editingPlan.name || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
+                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                    placeholder="VIP Monthly"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Price</label>
+                  <input
+                    type="text"
+                    value={editingPlan.price || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
+                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                    placeholder="Rp15.000"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Original Price (for discount)</label>
+                  <input
+                    type="text"
+                    value={editingPlan.original_price || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, original_price: e.target.value || null })}
+                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                    placeholder="Rp20.000"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Period</label>
+                  <input
+                    type="text"
+                    value={editingPlan.period || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, period: e.target.value })}
+                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                    placeholder="/ month"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Discount %</label>
+                  <input
+                    type="number"
+                    value={editingPlan.discount_percent || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, discount_percent: e.target.value ? parseInt(e.target.value) : null })}
+                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                    placeholder="25"
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Description</label>
+                  <input
+                    type="text"
+                    value={editingPlan.description || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, description: e.target.value })}
+                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                    placeholder="Best for regular users"
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Info Gangguan / Maintenance</label>
+                  <input
+                    type="text"
+                    value={editingPlan.info_gangguan || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, info_gangguan: e.target.value || null })}
+                    className="w-full p-2 border-2 border-red-400 rounded-lg bg-red-50 dark:bg-red-900/20 dark:text-white font-bold text-sm"
+                    placeholder="Maintenance until 20:00"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Accent Color</label>
+                  <select
+                    value={editingPlan.accent || "cyan"}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, accent: e.target.value as any })}
+                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                  >
+                    {ACCENT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Sort Order</label>
+                  <input
+                    type="number"
+                    value={editingPlan.sort_order || 0}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, sort_order: parseInt(e.target.value) })}
+                    className="w-full p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                  />
+                </div>
+
+                <div className="col-span-2 flex gap-4 flex-wrap">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editingPlan.popular || false}
+                      onChange={(e) => setEditingPlan({ ...editingPlan, popular: e.target.checked })}
+                      className="w-4 h-4 border-2 border-neo-black rounded"
+                    />
+                    <span className="text-sm font-bold dark:text-white">Popular</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editingPlan.is_active || false}
+                      onChange={(e) => setEditingPlan({ ...editingPlan, is_active: e.target.checked })}
+                      className="w-4 h-4 border-2 border-neo-black rounded"
+                    />
+                    <span className="text-sm font-bold dark:text-white">Active</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editingPlan.is_free || false}
+                      onChange={(e) => setEditingPlan({ ...editingPlan, is_free: e.target.checked })}
+                      className="w-4 h-4 border-2 border-neo-black rounded"
+                    />
+                    <span className="text-sm font-bold dark:text-white">Free Plan</span>
+                  </label>
+                </div>
+
+                <div className="col-span-2">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">Features</label>
+                  <div className="space-y-2">
+                    {(editingPlan.features || []).map((feature, i) => (
+                      <div key={i} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={feature}
+                          onChange={(e) => updateFeature(i, e.target.value)}
+                          className="flex-1 p-2 border-2 border-neo-black rounded-lg bg-white dark:bg-neo-gray-dark dark:text-white font-bold text-sm"
+                          placeholder={`Feature ${i + 1}`}
+                        />
+                        <button
+                          onClick={() => removeFeature(i)}
+                          className="neo-button p-2 bg-red-100 text-red-600 border-2 border-red-400"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={addFeature}
+                      className="neo-button px-3 py-2 bg-gray-100 dark:bg-neo-gray-dark text-sm font-bold border-2 border-neo-black w-full"
+                    >
+                      <Plus className="w-4 h-4 inline mr-1" /> Add Feature
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setIsModalOpen(false); setEditingPlan(null) }}
+                  className="flex-1 neo-button px-4 py-3 bg-gray-200 dark:bg-neo-gray-dark text-sm font-bold border-2 border-neo-black"
+                >
+                  Cancel
+                </button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-1 neo-button px-4 py-3 bg-neo-cyan text-white text-sm font-bold border-2 border-neo-black flex items-center justify-center gap-2"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                  {saving ? "Saving..." : "Save Plan"}
+                </motion.button>
+              </div>
+            </div>
           </motion.div>
         </div>
       )}

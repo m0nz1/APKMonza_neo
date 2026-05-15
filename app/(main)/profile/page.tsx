@@ -158,17 +158,16 @@ export default function ProfilePage() {
 
               <div className="flex flex-wrap gap-2 justify-center">
                 {/* VIP Upgrade button — only shows if not VIP */}
-                {!profile?.is_vip && (
-                  <a
-                    href={`https://wa.me/6289696089274?text=Saya%20mau%20berlangganan%20VIP%20di%20APKMonza`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="neo-button px-4 py-2 bg-neo-yellow text-neo-black text-sm font-bold flex items-center gap-2"
-                  >
-                    <Crown className="w-4 h-4" /> Upgrade ke VIP
-                    <ArrowUpRight className="w-3 h-3" />
-                  </a>
-                )}
+{!profile?.is_vip && (
+  <Link
+    href="/membership"
+    className="neo-button px-4 py-2 bg-neo-yellow text-neo-black text-sm font-bold flex items-center gap-2"
+  >
+    <Crown className="w-4 h-4" /> Upgrade to VIP
+    <ArrowUpRight className="w-3 h-3" />
+  </Link>
+)}
+
 
                 <button
                   onClick={() => setIsEditing(true)}
