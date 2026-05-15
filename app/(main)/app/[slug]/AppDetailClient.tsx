@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Download, Calendar, Package, HardDrive, Crown, ArrowLeft, ChevronRight, Zap, Info, Server, Star } from "lucide-react"
@@ -102,7 +101,20 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         <div className="flex items-center gap-4">
           <div className="flex-shrink-0 w-24 h-24 bg-neo-cyan/20 dark:bg-neo-purple/20 border-3 border-neo-black rounded-2xl flex items-center justify-center overflow-hidden shadow-neo">
             {app.icon_url ? (
-              <Image src={app.icon_url} alt={app.name} width={96} height={96} className="w-full h-full object-cover" />
+              <img
+                src={app.icon_url}
+                alt={app.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                  const parent = target.parentElement
+                  if (parent) {
+                    parent.innerHTML = `<span class="text-3xl font-bold text-neo-cyan dark:text-neo-purple">${app.name.charAt(0)}</span>`
+                  }
+                }}
+              />
             ) : (
               <span className="text-3xl font-bold text-neo-cyan dark:text-neo-purple">{app.name.charAt(0)}</span>
             )}
@@ -135,7 +147,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         </div>
       </motion.div>
 
-      {/* 2. Screenshots - PAKE <img> BIASA SUPAYA EXTERNAL URL TIDAK DI-BLOCK */}
+      {/* 2. Screenshots */}
       {app.screenshots && app.screenshots.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -153,17 +165,17 @@ export function AppDetailClient({ app, relatedApps }: Props) {
                   activeImage === i ? "border-neo-cyan dark:border-neo-purple shadow-neo-cyan" : "border-neo-black"
                 }`}
               >
-                {/* GANTI Image jadi img */}
                 <img
                   src={screenshot}
                   alt={`Screenshot ${i + 1}`}
                   className="w-full h-full object-cover"
                   loading="lazy"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    const parent = (e.target as HTMLImageElement).parentElement;
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                    const parent = target.parentElement
                     if (parent) {
-                      parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 text-sm font-medium">Failed to load</div>';
+                      parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 text-sm font-medium">Failed to load</div>'
                     }
                   }}
                 />
@@ -347,5 +359,5 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
       <p className="font-bold text-sm truncate">{value}</p>
     </div>
   )
-            }
-            
+                                                                                           }
+    
