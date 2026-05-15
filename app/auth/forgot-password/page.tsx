@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
     }
 
     setSent(true)
-    toast.success("Link reset password telah dikirim ke email Anda!")
+    toast.success("Password reset link has been sent to your email!")
   }
 
   return (
@@ -43,10 +43,10 @@ export default function ForgotPasswordPage() {
           <Download className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-black">
-          <span className="text-neo-cyan dark:text-neo-purple">Neo</span>
-          <span className="text-neo-yellow">Store</span>
+          <span className="text-neo-cyan dark:text-neo-purple">APK</span>
+          <span className="text-neo-yellow">Monza</span>
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">Reset password Anda</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">Reset your password</p>
       </div>
 
       <div className="neo-card bg-white dark:bg-neo-gray-dark p-8">
@@ -55,12 +55,12 @@ export default function ForgotPasswordPage() {
             <div className="w-16 h-16 bg-neo-cyan/20 dark:bg-neo-purple/20 border-2 border-neo-black rounded-full flex items-center justify-center mx-auto">
               <Mail className="w-8 h-8 text-neo-cyan dark:text-neo-purple" />
             </div>
-            <h2 className="text-xl font-bold">Cek Email Anda</h2>
+            <h2 className="text-xl font-bold">Check Your Email</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Kami telah mengirimkan link reset password ke {email}
+              We have sent a password reset link to {email}
             </p>
             <Link href="/auth/login" className="neo-button inline-block px-6 py-2 bg-neo-cyan dark:bg-neo-purple text-white font-bold">
-              Kembali ke Login
+              Back to Login
             </Link>
           </div>
         ) : (
@@ -86,14 +86,14 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               className="neo-button w-full py-3 bg-neo-cyan dark:bg-neo-purple text-white font-black text-lg disabled:opacity-50"
             >
-              {loading ? "Loading..." : "Kirim Link Reset"}
+              {loading ? "Loading..." : "Send Reset Link"}
             </motion.button>
           </form>
         )}
 
         <div className="mt-6">
           <Link href="/auth/login" className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-neo-cyan dark:hover:text-neo-purple transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Kembali ke Login
+            <ArrowLeft className="w-4 h-4" /> Back to Login
           </Link>
         </div>
       </div>
