@@ -45,9 +45,9 @@ export default async function HomePage() {
       {/* Search Section */}
       <section>
         <h1 className="text-3xl md:text-4xl font-black mb-4">
-          <span className="text-neo-cyan dark:text-neo-purple">Temukan</span>{" "}
-          <span className="text-neo-yellow">APK & Game</span>{" "}
-          <span className="text-neo-black dark:text-white">Terbaik</span>
+          <span className="text-neo-cyan dark:text-neo-purple">Discover</span>{" "}
+          <span className="text-neo-yellow">Best APKs</span>{" "}
+          <span className="text-neo-black dark:text-white">& Games</span>
         </h1>
         <SearchBar />
       </section>
@@ -56,7 +56,7 @@ export default async function HomePage() {
       <section>
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <span className="w-2 h-8 bg-neo-cyan dark:bg-neo-purple rounded-full" />
-          Kategori
+          Categories
         </h2>
         {categories.length > 0 ? (
           <CategoryList categories={categories} />
@@ -71,7 +71,7 @@ export default async function HomePage() {
       <section>
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <span className="w-2 h-8 bg-neo-yellow rounded-full" />
-          Rekomendasi
+          Recommended
         </h2>
         <Suspense fallback={<SkeletonGrid count={6} />}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -80,7 +80,9 @@ export default async function HomePage() {
                 <AppCard key={app.id} app={app} index={i} />
               ))
             ) : (
-              <EmptyState title="Belum ada rekomendasi" />
+              <div className="col-span-full">
+                <EmptyState title="No recommendations yet" />
+              </div>
             )}
           </div>
         </Suspense>
@@ -90,7 +92,7 @@ export default async function HomePage() {
       <section>
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <span className="w-2 h-8 bg-neo-purple dark:bg-neo-cyan rounded-full" />
-          Terbaru Diupload
+          Recently Uploaded
         </h2>
         <Suspense fallback={<SkeletonGrid count={6} />}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -99,7 +101,9 @@ export default async function HomePage() {
                 <AppCard key={app.id} app={app} index={i} />
               ))
             ) : (
-              <EmptyState title="Belum ada aplikasi" />
+              <div className="col-span-full">
+                <EmptyState title="No apps available yet" />
+              </div>
             )}
           </div>
         </Suspense>
