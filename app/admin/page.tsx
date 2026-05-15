@@ -195,27 +195,27 @@ function DashboardTab() {
 }
 
 function AppsTab() {
-  const [apps, setApps] = useState<App[]>([])
+  const [apps, setApps] = useState<<App[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [showModal, setShowModal] = useState(false)
-  const [editingApp, setEditingApp] = useState<App | null>(null)
+  const [editingApp, setEditingApp] = useState<<App | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const supabase = createClient()
 
-  const emptyApp: Partial<App> = {
+  const emptyApp: Partial<<App> = {
     name: "", slug: "", version: "", developer: "",
     mod_feature: "", mod_feature_full: "", description: "",
     package_name: "", size: "", free_url: "", vip_url: "",
     category_id: "", icon_url: "", screenshots: [], is_recommended: false,
     rating: 4.5, download_count: 0,
   }
-  const [formData, setFormData] = useState<Partial<App>>(emptyApp)
+  const [formData, setFormData] = useState<<Partial<<App>>(emptyApp)
 
   useEffect(() => { fetchApps(); fetchCategories() }, [])
 
   const fetchApps = async () => {
     const { data, error } = await supabase.from("apps").select("*").order("created_at", { ascending: false })
-    if (error) { toast.error("Gagal load apps: " + error.message); return }
+    if (error) { toast.error("Failed to load apps: " + error.message); return }
     setApps(data || [])
   }
 
@@ -231,27 +231,27 @@ function AppsTab() {
 
     if (editingApp) {
       const { error } = await supabase.from("apps").update(dataToSend).eq("id", editingApp.id)
-      if (error) { toast.error("Gagal update: " + error.message); return }
+      if (error) { toast.error("Failed to update: " + error.message); return }
       toast.success("App updated!")
     } else {
       const { error } = await supabase.from("apps").insert(dataToSend)
-      if (error) { toast.error("Gagal create: " + error.message); return }
+      if (error) { toast.error("Failed to create: " + error.message); return }
       toast.success("App created!")
     }
     setShowModal(false); setEditingApp(null); setFormData(emptyApp); fetchApps()
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus app ini?")) return
+    if (!confirm("Are you sure you want to delete this app?")) return
     const { error } = await supabase.from("apps").delete().eq("id", id)
-    if (error) { toast.error("Gagal hapus: " + error.message); return }
+    if (error) { toast.error("Failed to delete: " + error.message); return }
     toast.success("App deleted!"); fetchApps()
   }
 
   const toggleRecommended = async (app: App) => {
     const { error } = await supabase.from("apps").update({ is_recommended: !app.is_recommended }).eq("id", app.id)
-    if (error) { toast.error("Gagal update: " + error.message); return }
-    toast.success(app.is_recommended ? "Dihapus dari rekomendasi" : "Ditambahkan ke rekomendasi!")
+    if (error) { toast.error("Failed to update: " + error.message); return }
+    toast.success(app.is_recommended ? "Removed from recommendations" : "Added to recommendations!")
     fetchApps()
   }
 
@@ -295,7 +295,7 @@ function AppsTab() {
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{app.version}</td>
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{categories.find((c) => c.id === app.category_id)?.name || "-"}</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleRecommended(app)} className={`neo-button p-1.5 ${app.is_recommended ? "bg-neo-yellow text-neo-black" : "bg-gray-200 text-gray-500"}`} title={app.is_recommended ? "Hapus dari rekomendasi" : "Tambah ke rekomendasi"}>
+                    <button onClick={() => toggleRecommended(app)} className={`neo-button p-1.5 ${app.is_recommended ? "bg-neo-yellow text-neo-black" : "bg-gray-200 text-gray-500"}`} title={app.is_recommended ? "Remove from recommendations" : "Add to recommendations"}>
                       <Star className={`w-4 h-4 ${app.is_recommended ? "fill-current" : ""}`} />
                     </button>
                   </td>
@@ -329,7 +329,6 @@ function AppsTab() {
                 <div><label className="block font-bold text-sm mb-1">Package Name</label><input value={formData.package_name || ""} onChange={(e) => setFormData({ ...formData, package_name: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="com.example.app" /></div>
                 <div><label className="block font-bold text-sm mb-1">Size</label><input value={formData.size || ""} onChange={(e) => setFormData({ ...formData, size: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="50 MB" /></div>
                 <div><label className="block font-bold text-sm mb-1">Icon URL</label><input value={formData.icon_url || ""} onChange={(e) => setFormData({ ...formData, icon_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
-                {/* ===== RATING & DOWNLOAD COUNT ===== */}
                 <div>
                   <label className="block font-bold text-sm mb-1 flex items-center gap-1">
                     <Star className="w-3 h-3 text-neo-yellow fill-neo-yellow" /> Rating
@@ -358,7 +357,6 @@ function AppsTab() {
                     placeholder="0"
                   />
                 </div>
-                                {/* ===== END ===== */}
               </div>
               <div><label className="block font-bold text-sm mb-1">Mod Feature (Short)</label><input value={formData.mod_feature || ""} onChange={(e) => setFormData({ ...formData, mod_feature: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Unlimited Money" /></div>
               <div><label className="block font-bold text-sm mb-1">Mod Feature (Full)</label><input value={formData.mod_feature_full || ""} onChange={(e) => setFormData({ ...formData, mod_feature_full: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Full mod description" /></div>
@@ -369,7 +367,7 @@ function AppsTab() {
               </div>
               <div className="flex items-center gap-3 p-3 border-2 border-neo-black rounded-lg bg-neo-gray-light dark:bg-neo-gray-dark">
                 <input type="checkbox" id="is_recommended" checked={formData.is_recommended || false} onChange={(e) => setFormData({ ...formData, is_recommended: e.target.checked })} className="w-5 h-5 border-2 border-neo-black rounded cursor-pointer" />
-                <label htmlFor="is_recommended" className="font-bold text-sm cursor-pointer flex items-center gap-2"><Star className="w-4 h-4 text-neo-yellow" /> Tampilkan di Rekomendasi</label>
+                <label htmlFor="is_recommended" className="font-bold text-sm cursor-pointer flex items-center gap-2"><Star className="w-4 h-4 text-neo-yellow" /> Show in Recommendations</label>
               </div>
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setShowModal(false)} className="neo-button flex-1 py-2 bg-gray-200 font-bold">Cancel</button>
@@ -392,20 +390,20 @@ function UsersTab() {
 
   const fetchUsers = async () => {
     const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
-    if (error) { toast.error("Gagal load users: " + error.message); return }
+    if (error) { toast.error("Failed to load users: " + error.message); return }
     setUsers(data || [])
   }
 
   const toggleVip = async (id: string, currentStatus: boolean) => {
     const { error } = await supabase.from("users").update({ is_vip: !currentStatus, vip_expires_at: !currentStatus ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : null }).eq("id", id)
-    if (error) { toast.error("Gagal toggle VIP: " + error.message); return }
+    if (error) { toast.error("Failed to toggle VIP: " + error.message); return }
     toast.success(`VIP ${!currentStatus ? "activated" : "deactivated"}!`); fetchUsers()
   }
 
   const toggleAdmin = async (id: string, currentRole: string) => {
     const newRole = currentRole === "admin" ? "user" : "admin"
     const { error } = await supabase.from("users").update({ role: newRole }).eq("id", id)
-    if (error) { toast.error("Gagal toggle admin: " + error.message); return }
+    if (error) { toast.error("Failed to toggle admin: " + error.message); return }
     toast.success(`Role updated to ${newRole}!`); fetchUsers()
   }
 
@@ -455,7 +453,7 @@ function CategoriesTab() {
 
   const fetchCategories = async () => {
     const { data, error } = await supabase.from("categories").select("*").order("name")
-    if (error) { toast.error("Gagal load categories: " + error.message); return }
+    if (error) { toast.error("Failed to load categories: " + error.message); return }
     setCategories(data || [])
   }
 
@@ -463,20 +461,20 @@ function CategoriesTab() {
     e.preventDefault()
     if (editingCat) {
       const { error } = await supabase.from("categories").update(formData).eq("id", editingCat.id)
-      if (error) { toast.error("Gagal update: " + error.message); return }
+      if (error) { toast.error("Failed to update: " + error.message); return }
       toast.success("Category updated!")
     } else {
       const { error } = await supabase.from("categories").insert({ ...formData, slug: formData.name.toLowerCase().replace(/\s+/g, "-") })
-      if (error) { toast.error("Gagal create: " + error.message); return }
+      if (error) { toast.error("Failed to create: " + error.message); return }
       toast.success("Category created!")
     }
     setShowModal(false); setEditingCat(null); setFormData({ name: "", slug: "", icon: "", color: "#06b6d4" }); fetchCategories()
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus kategori ini?")) return
+    if (!confirm("Are you sure you want to delete this category?")) return
     const { error } = await supabase.from("categories").delete().eq("id", id)
-    if (error) { toast.error("Gagal hapus: " + error.message); return }
+    if (error) { toast.error("Failed to delete: " + error.message); return }
     toast.success("Category deleted!"); fetchCategories()
   }
 
@@ -509,5 +507,4 @@ function CategoriesTab() {
       )}
     </div>
   )
-                      }
-            
+    }
