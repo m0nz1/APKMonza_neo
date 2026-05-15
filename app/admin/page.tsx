@@ -162,7 +162,6 @@ function DashboardTab() {
           return (
             <div key={stat.label} className="neo-card bg-white dark:bg-neo-gray-dark p-5">
               <div className="flex items-center justify-between mb-3">
-                <div className={`">
                 <div className={`w-10 h-10 ${stat.color} border-2 border-neo-black rounded-lg flex items-center justify-center shadow-neo`}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
@@ -341,7 +340,7 @@ function AppsTab() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(app)} className="neo-button p-2 bg-neo-yellow text-neo-black"><Pencil className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(app.id)} className => handleDelete(app.id)} className="neo-button p-2 bg-red-500 text-white"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(app.id)} className="neo-button p-2 bg-red-500 text-white"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
