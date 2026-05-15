@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Package, Users, Tags, ArrowLeft, Shield,
   Plus, Pencil, Trash2, Search, Crown, UserCheck, UserX,
   Image as ImageIcon, BarChart3, TrendingUp,
-  Download, X, Star
+  Download, X, Star, Link as LinkIcon, Trash
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { App } from "@/types"
@@ -18,7 +18,7 @@ type Tab = "dashboard" | "apps" | "users" | "categories"
 
 const tabs = [
   { id: "dashboard" as Tab, label: "Dashboard", icon: LayoutDashboard },
-  { id: "apps" as Tab, label: "Apps", icon: Package },
+  { id: ": "apps" as Tab, label: "Apps", icon: Package },
   { id: "users" as Tab, label: "Users", icon: Users },
   { id: "categories" as Tab, label: "Categories", icon: Tags },
 ]
@@ -162,6 +162,7 @@ function DashboardTab() {
           return (
             <div key={stat.label} className="neo-card bg-white dark:bg-neo-gray-dark p-5">
               <div className="flex items-center justify-between mb-3">
+                <div className={`">
                 <div className={`w-10 h-10 ${stat.color} border-2 border-neo-black rounded-lg flex items-center justify-center shadow-neo`}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
@@ -195,21 +196,22 @@ function DashboardTab() {
 }
 
 function AppsTab() {
-  const [apps, setApps] = useState<App[]>([])
+  const [apps, setApps] = useState<<App[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [showModal, setShowModal] = useState(false)
-  const [editingApp, setEditingApp] = useState<App | null>(null)
+  const [editingApp, setEditingApp] = useState<<App | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [screenshotUrl, setScreenshotUrl] = useState("")
   const supabase = createClient()
 
-  const emptyApp: Partial<App> = {
+  const emptyApp: Partial<<App> = {
     name: "", slug: "", version: "", developer: "",
     mod_feature: "", mod_feature_full: "", description: "",
     package_name: "", size: "", free_url: "", vip_url: "",
     category_id: "", icon_url: "", screenshots: [], is_recommended: false,
     rating: 4.5, download_count: 0,
   }
-  const [formData, setFormData] = useState<Partial<App>>(emptyApp)
+  const [formData, setFormData] = useState<<Partial<<App>>(emptyApp)
 
   useEffect(() => { fetchApps(); fetchCategories() }, [])
 
@@ -238,7 +240,7 @@ function AppsTab() {
       if (error) { toast.error("Failed to create: " + error.message); return }
       toast.success("App created!")
     }
-    setShowModal(false); setEditingApp(null); setFormData(emptyApp); fetchApps()
+    setShowModal(false); setEditingApp(null); setFormData(emptyApp); setScreenshotUrl(""); fetchApps()
   }
 
   const handleDelete = async (id: string) => {
@@ -255,8 +257,45 @@ function AppsTab() {
     fetchApps()
   }
 
-  const openEdit = (app: App) => { setEditingApp(app); setFormData(app); setShowModal(true) }
-  const openCreate = () => { setEditingApp(null); setFormData(emptyApp); setShowModal(true) }
+  const openEdit = (app: App) => { 
+    setEditingApp(app); 
+    setFormData(app); 
+    setShowModal(true) 
+  }
+  
+  const openCreate = () => { 
+    setEditingApp(null); 
+    setFormData(emptyApp); 
+    setScreenshotUrl("");
+    setShowModal(true) 
+  }
+
+  const addScreenshot = () => {
+    if (!screenshotUrl.trim()) {
+      toast.error("Please enter a screenshot URL")
+      return
+    }
+    if (!screenshotUrl.match(/^https?:\/\/.+/)) {
+      toast.error("Please enter a valid URL (https://...)")
+      return
+    }
+    const currentScreenshots = formData.screenshots || []
+    if (currentScreenshots.includes(screenshotUrl.trim())) {
+      toast.error("This screenshot URL already exists")
+      return
+    }
+    setFormData({ ...formData, screenshots: [...currentScreenshots, screenshotUrl.trim()] })
+    setScreenshotUrl("")
+    toast.success("Screenshot added!")
+  }
+
+  const removeScreenshot = (index: number) => {
+    const currentScreenshots = formData.screenshots || []
+    const newScreenshots = currentScreenshots.filter((_, i) => i !== index)
+    setFormData({ ...formData, screenshots: newScreenshots })
+    toast.success("Screenshot removed!")
+  }
+
   const filtered = apps.filter((a) => a.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
@@ -302,7 +341,7 @@ function AppsTab() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(app)} className="neo-button p-2 bg-neo-yellow text-neo-black"><Pencil className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(app.id)} className="neo-button p-2 bg-red-500 text-white"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(app.id)} className => handleDelete(app.id)} className="neo-button p-2 bg-red-500 text-white"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -358,8 +397,75 @@ function AppsTab() {
                   />
                 </div>
               </div>
+
+              {/* Screenshots Section */}
+              <div className="border-2 border-neo-black rounded-lg p-4 bg-neo-gray-light dark:bg-neo-gray-dark space-y-3">
+                <label className="block font-bold text-sm flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-neo-cyan dark:text-neo-purple" />
+                  Screenshots
+                </label>
+                
+                <div className="flex gap-2">
+                  <div className="flex-1 relative">
+                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={screenshotUrl}
+                      onChange={(e) => setScreenshotUrl(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addScreenshot())}
+                      placeholder="Paste image URL (e.g. https://i.ibb.co/...)"
+                      className="neo-input w-full pl-10 pr-3 py-2 text-sm"
+                    />
+                  </div>
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={addScreenshot}
+                    className="neo-button px-4 py-2 bg-neo-cyan dark:bg-neo-purple text-white text-sm font-bold flex items-center gap-1"
+                  >
+                    <Plus className="w-4 h-4" /> Add
+                  </motion.button>
+                </div>
+
+                {/* Preview Grid */}
+                {formData.screenshots && formData.screenshots.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {formData.screenshots.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-[9/16] rounded-lg border-2 border-neo-black overflow-hidden bg-white dark:bg-neo-gray-dark">
+                          <img
+                            src={url}
+                            alt={`Screenshot ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='10'%3EBroken Link%3C/text%3E%3C/svg%3E"
+                            }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeScreenshot(index)}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full border-2 border-neo-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-neo"
+                          title="Remove screenshot"
+                        >
+                          <Trash className="w-3 h-3" />
+                        </button>
+                        <p className="text-xs text-gray-500 mt-1 truncate px-1">Screenshot {index + 1}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {(!formData.screenshots || formData.screenshots.length === 0) && (
+                  <div className="text-center py-6 text-gray-500 text-sm font-medium border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                    <ImageIcon className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                    No screenshots added yet. Paste a URL above and click Add.
+                  </div>
+                )}
+              </div>
+
               <div><label className="block font-bold text-sm mb-1">Mod Feature (Short)</label><input value={formData.mod_feature || ""} onChange={(e) => setFormData({ ...formData, mod_feature: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Unlimited Money" /></div>
-                <div><label className="block font-bold text-sm mb-1">Mod Feature (Full)</label><input value={formData.mod_feature_full || ""} onChange={(e) => setFormData({ ...formData, mod_feature_full: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Full mod description" /></div>
+              <div><label className="block font-bold text-sm mb-1">Mod Feature (Full)</label><input value={formData.mod_feature_full || ""} onChange={(e) => setFormData({ ...formData, mod_feature_full: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Full mod description" /></div>
               <div><label className="block font-bold text-sm mb-1">Description</label><textarea value={formData.description || ""} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} className="neo-input w-full px-3 py-2" placeholder="App description..." /></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block font-bold text-sm mb-1">Free Download URL</label><input value={formData.free_url || ""} onChange={(e) => setFormData({ ...formData, free_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
@@ -556,7 +662,7 @@ function UsersTab() {
       )}
     </div>
   )
-      }
+}
 
 function CategoriesTab() {
   const [categories, setCategories] = useState<any[]>([])
@@ -613,7 +719,7 @@ function CategoriesTab() {
           <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="neo-card bg-white dark:bg-neo-gray-dark p-6 max-w-md w-full">
             <div className="flex items-center justify-between mb-4"><h2 className="text-xl font-black">{editingCat ? "Edit" : "Add"} Category</h2><button onClick={() => setShowModal(false)} className="neo-button p-2"><X className="w-4 h-4" /></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div><label className="block font-bold text-sm mb-1">Name</label><input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="neo-input w-full px-3 py-2" /></div>
+                            <div><label className="block font-bold text-sm mb-1">Name</label><input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="neo-input w-full px-3 py-2" /></div>
               <div><label className="block font-bold text-sm mb-1">Icon (lucide name)</label><input value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="gamepad2" /></div>
               <div><label className="block font-bold text-sm mb-1">Color</label><div className="flex gap-2"><input type="color" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="w-12 h-10 border-2 border-neo-black rounded-lg cursor-pointer" /><input value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="neo-input flex-1 px-3 py-2" /></div></div>
               <div className="flex gap-3 pt-2"><button type="button" onClick={() => setShowModal(false)} className="neo-button flex-1 py-2 bg-gray-200 font-bold">Cancel</button><button type="submit" className="neo-button flex-1 py-2 bg-neo-cyan dark:bg-neo-purple text-white font-bold">Save</button></div>
@@ -623,5 +729,4 @@ function CategoriesTab() {
       )}
     </div>
   )
-                                      }
-        
+    }
