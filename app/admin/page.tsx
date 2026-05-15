@@ -76,7 +76,7 @@ export default function AdminPage() {
             <div className="w-10 h-10 bg-neo-cyan dark:bg-neo-purple border-2 border-neo-black rounded-lg shadow-neo flex items-center justify-center">
               <ArrowLeft className="w-5 h-5 text-white" />
             </div>
-            <span className="font-black text-lg">NeoStore</span>
+            <span className="font-black text-lg">APKMonza</span>
           </Link>
           <div className="flex items-center gap-2 mb-6 px-4 py-2 bg-neo-yellow/20 border-2 border-neo-black rounded-lg">
             <Shield className="w-4 h-4 text-neo-yellow-dark" />
