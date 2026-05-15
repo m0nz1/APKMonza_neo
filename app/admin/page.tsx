@@ -295,7 +295,7 @@ function AppsTab() {
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{app.version}</td>
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{categories.find((c) => c.id === app.category_id)?.name || "-"}</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleRecommended(app)} className={`neo-button p-1.5 ${app.is_recommended ? "bg-neo-yellow text-neo-black" : "bg-gray-200 text-gray-500"}`} title={app.is_recommended ? "Remove from recommendations" : "Add to recommendations"}>
+                    <button onClick={() => toggleRecommended(app)} className={`neo-button p-1.5 ${app.is_recommended ? "bg-neo-yellow text-neo-black" : "bg-gray-200 text-gray-500"}`} title={app.is_recommended ? "Remove from recommendation" : "Add to recommendation"}>
                       <Star className={`w-4 h-4 ${app.is_recommended ? "fill-current" : ""}`} />
                     </button>
                   </td>
@@ -359,7 +359,7 @@ function AppsTab() {
                 </div>
               </div>
               <div><label className="block font-bold text-sm mb-1">Mod Feature (Short)</label><input value={formData.mod_feature || ""} onChange={(e) => setFormData({ ...formData, mod_feature: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Unlimited Money" /></div>
-              <div><label className="block font-bold text-sm mb-1">Mod Feature (Full)</label><input value={formData.mod_feature_full || ""} onChange={(e) => setFormData({ ...formData, mod_feature_full: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Full mod description" /></div>
+                <div><label className="block font-bold text-sm mb-1">Mod Feature (Full)</label><input value={formData.mod_feature_full || ""} onChange={(e) => setFormData({ ...formData, mod_feature_full: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="Full mod description" /></div>
               <div><label className="block font-bold text-sm mb-1">Description</label><textarea value={formData.description || ""} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} className="neo-input w-full px-3 py-2" placeholder="App description..." /></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block font-bold text-sm mb-1">Free Download URL</label><input value={formData.free_url || ""} onChange={(e) => setFormData({ ...formData, free_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
@@ -507,4 +507,5 @@ function CategoriesTab() {
       )}
     </div>
   )
-    }
+                                      }
+        
