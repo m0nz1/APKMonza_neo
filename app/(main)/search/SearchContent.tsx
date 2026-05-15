@@ -94,7 +94,7 @@ export default function SearchContent() {
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
         <SlidersHorizontal className="w-5 h-5" />
-        <h1 className="text-2xl font-black">Cari Aplikasi</h1>
+        <h1 className="text-2xl font-black">Search Apps</h1>
       </div>
 
       <SearchBar initialQuery={query} onSearch={handleSearch} />
@@ -109,7 +109,7 @@ export default function SearchContent() {
               : "bg-white dark:bg-neo-gray-dark"
           }`}
         >
-          Semua
+          All
         </button>
         {categories.map((cat) => (
           <button
@@ -136,8 +136,8 @@ export default function SearchContent() {
           ))
         ) : (
           <EmptyState 
-            title="Tidak ditemukan" 
-            description={`Tidak ada aplikasi untuk "${query}"`} 
+            title="No Results" 
+            description={`No apps found for "${query}"`} 
           />
         )}
       </div>
