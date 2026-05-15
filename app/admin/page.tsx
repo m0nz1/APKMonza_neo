@@ -209,7 +209,7 @@ function AppsTab() {
     category_id: "", icon_url: "", screenshots: [], is_recommended: false,
     rating: 4.5, download_count: 0,
   }
-  const [formData, setFormData] = useState<Partial<App>(emptyApp)
+  const [formData, setFormData] = useState<Partial<App>>(emptyApp)
 
   useEffect(() => { fetchApps(); fetchCategories() }, [])
 
