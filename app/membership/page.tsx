@@ -146,7 +146,7 @@ export default function MembershipPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.08 }}
                 className={`
-                  neo-card
+                  neo-card relative
                   ${isFree
                     ? "bg-white dark:bg-neo-gray-dark border-dashed border-2 border-gray-300 dark:border-gray-600"
                     : current
@@ -166,129 +166,128 @@ export default function MembershipPage() {
                   </div>
                 )}
 
-              <div className={`p-4 md:p-5 ${current ? "pt-8 md:pt-9" : ""}`}>
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
-                  <div className="flex-shrink-0 flex md:block items-center gap-3">
-                    <div className={`w-14 h-14 md:w-16 md:h-16 ${accent.softBg} border-3 border-neo-black rounded-2xl flex items-center justify-center`}>
-                      {isFree ? (
-                        <Shield className={`w-7 h-7 md:w-8 md:h-8 ${accent.softText}`} />
-                      ) : (
-                        <Crown className={`w-7 h-7 md:w-8 md:h-8 ${accent.softText}`} />
-                      )}
-                    </div>
-                    <div className="md:hidden flex-1">
-                      <h3 className="text-lg font-black dark:text-white">{plan.name}</h3>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-black text-neo-black dark:text-white">{plan.price}</span>
-                        {plan.period && <span className="text-xs text-gray-500">{plan.period}</span>}
+                {plan.popular && !current && (
+                  <div className={`absolute top-4 right-4 md:top-5 md:right-5 px-3 py-1 ${accent.bg} border-2 border-neo-black rounded-full z-10`}>
+                    <span className={`text-xs font-black ${accent.text} flex items-center gap-1`}>
+                      <Zap className="w-3 h-3" /> MOST POPULAR
+                    </span>
+                  </div>
+                )}
+
+                <div className={`p-4 md:p-5 ${current ? "pt-8 md:pt-9" : ""}`}>
+                  <div className="flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="flex-shrink-0 flex md:block items-center gap-3">
+                      <div className={`w-14 h-14 md:w-16 md:h-16 ${accent.softBg} border-3 border-neo-black rounded-2xl flex items-center justify-center`}>
+                        {isFree ? (
+                          <Shield className={`w-7 h-7 md:w-8 md:h-8 ${accent.softText}`} />
+                        ) : (
+                          <Crown className={`w-7 h-7 md:w-8 md:h-8 ${accent.softText}`} />
+                        )}
+                      </div>
+                      <div className="md:hidden flex-1">
+                        <h3 className="text-lg font-black dark:text-white">{plan.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-black text-neo-black dark:text-white">{plan.price}</span>
+                          {plan.period && <span className="text-xs text-gray-500">{plan.period}</span>}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="hidden md:flex items-center gap-2 mb-1">
-                      <h3 className="text-xl font-black dark:text-white">{plan.name}</h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="hidden md:flex items-center gap-2 mb-1">
+                        <h3 className="text-xl font-black dark:text-white">{plan.name}</h3>
+                        {plan.info_gangguan && (
+                          <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-full border border-red-400 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" /> {plan.info_gangguan}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2 md:mb-1">{plan.description}</p>
                       {plan.info_gangguan && (
-                        <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-full border border-red-400 flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3" /> {plan.info_gangguan}
-                        </span>
+                        <div className="md:hidden mb-2 p-2 bg-red-100 dark:bg-red-900/20 border border-red-400 rounded-lg flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                          <span className="text-xs font-bold text-red-600 dark:text-red-400">{plan.info_gangguan}</span>
+                        </div>
                       )}
-                    </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2 md:mb-1">{plan.description}</p>
-                    {plan.info_gangguan && (
-                      <div className="md:hidden mb-2 p-2 bg-red-100 dark:bg-red-900/20 border border-red-400 rounded-lg flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                        <span className="text-xs font-bold text-red-600 dark:text-red-400">{plan.info_gangguan}</span>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        {plan.features.slice(0, 3).map((feature, i) => (
+                          <span key={i} className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 font-medium">
+                            <Check className={`w-3 h-3 ${accent.softText}`} /> {feature}
+                          </span>
+                        ))}
+                        {plan.features.length > 3 && (
+                          <span className="text-xs text-gray-400">+{plan.features.length - 3} more</span>
+                        )}
                       </div>
-                    )}
-                    <div className="flex flex-wrap gap-x-3 gap-y-1">
-                      {plan.features.slice(0, 3).map((feature, i) => (
-                        <span key={i} className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 font-medium">
-                          <Check className={`w-3 h-3 ${accent.softText}`} /> {feature}
-                        </span>
-                      ))}
-                      {plan.features.length > 3 && (
-                        <span className="text-xs text-gray-400">+{plan.features.length - 3} more</span>
-                      )}
                     </div>
-                  </div>
 
-                  <div className="flex-shrink-0 flex flex-row md:flex-col items-center md:items-end gap-3 w-full md:w-auto">
-                    <div className="hidden md:block text-right">
+                    <div className="flex-shrink-0 flex flex-row md:flex-col items-center md:items-end gap-3 w-full md:w-auto">
+                      <div className="hidden md:block text-right">
+                        {hasDiscount && plan.original_price && (
+                          <div className="flex items-center gap-2 md:justify-end mb-1">
+                            <span className="text-sm text-gray-400 line-through font-bold">{plan.original_price}</span>
+                            <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-black rounded-full border border-red-400 flex items-center gap-1">
+                              <Tag className="w-3 h-3" /> -{plan.discount_percent}%
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-baseline gap-1 md:justify-end">
+                          <span className="text-2xl font-black text-neo-black dark:text-white">{plan.price}</span>
+                          {plan.period && <span className="text-sm font-bold text-gray-500 dark:text-gray-400">{plan.period}</span>}
+                        </div>
+                      </div>
+
                       {hasDiscount && plan.original_price && (
-                        <div className="flex items-center gap-2 md:justify-end mb-1">
+                        <div className="md:hidden flex items-center gap-2">
                           <span className="text-sm text-gray-400 line-through font-bold">{plan.original_price}</span>
-                          <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-black rounded-full border border-red-400 flex items-center gap-1">
-                            <Tag className="w-3 h-3" /> -{plan.discount_percent}%
+                          <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-black rounded-full border border-red-400">
+                            -{plan.discount_percent}%
                           </span>
                         </div>
                       )}
-                      <div className="flex items-baseline gap-1 md:justify-end">
-                        <span className="text-2xl font-black text-neo-black dark:text-white">{plan.price}</span>
-                        {plan.period && <span className="text-sm font-bold text-gray-500 dark:text-gray-400">{plan.period}</span>}
-                      </div>
-                    </div>
 
-                    {hasDiscount && plan.original_price && (
-                      <div className="md:hidden flex items-center gap-2">
-                        <span className="text-sm text-gray-400 line-through font-bold">{plan.original_price}</span>
-                        <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-black rounded-full border border-red-400">
-                          -{plan.discount_percent}%
-                        </span>
-                      </div>
-                    )}
-
-                    {current ? (
-                      <div className={`
-                        neo-button px-5 py-3 font-black text-sm flex items-center justify-center gap-2 w-full md:w-auto
-                        ${isFree 
-                          ? "bg-gray-100 dark:bg-neo-gray-dark text-gray-600 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600"
-                          : "bg-neo-cyan dark:bg-neo-purple text-white border-2 border-neo-black"
-                        }
-                      `}>
-                        <Star className="w-4 h-4 fill-current" />
-                        {isFree ? "Current Plan" : "Active Plan"}
-                      </div>
-                    ) : (
-                      <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleWhatsAppClick(plan)}
-                        className={`
+                      {current ? (
+                        <div className={`
                           neo-button px-5 py-3 font-black text-sm flex items-center justify-center gap-2 w-full md:w-auto
-                          ${isFree
+                          ${isFree 
                             ? "bg-gray-100 dark:bg-neo-gray-dark text-gray-600 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600"
-                            : `${accent.bg} ${accent.text} border-2 border-neo-black`
+                            : "bg-neo-cyan dark:bg-neo-purple text-white border-2 border-neo-black"
                           }
-                        `}
-                      >
-                        {isFree ? (
-                          <>
-                            <Shield className="w-4 h-4" />
-                            Current Plan
-                          </>
-                        ) : (
-                          <>
-                            <MessageCircle className="w-4 h-4" />
-                            Buy via WA
-                            <ArrowRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </motion.button>
-                    )}
+                        `}>
+                          <Star className="w-4 h-4 fill-current" />
+                          {isFree ? "Current Plan" : "Active Plan"}
+                        </div>
+                      ) : (
+                        <motion.button
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleWhatsAppClick(plan)}
+                          className={`
+                            neo-button px-5 py-3 font-black text-sm flex items-center justify-center gap-2 w-full md:w-auto
+                            ${isFree
+                              ? "bg-gray-100 dark:bg-neo-gray-dark text-gray-600 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600"
+                              : `${accent.bg} ${accent.text} border-2 border-neo-black`
+                            }
+                          `}
+                        >
+                          {isFree ? (
+                            <>
+                              <Shield className="w-4 h-4" />
+                              Current Plan
+                            </>
+                          ) : (
+                            <>
+                              <MessageCircle className="w-4 h-4" />
+                              Buy via WA
+                              <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </motion.button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-
-        {plan.popular && !current && (
-  <div className={`absolute top-4 right-4 md:top-5 md:right-5 px-3 py-1 ${accent.bg} border-2 border-neo-black rounded-full z-10`}>
-
-                <span className={`text-xs font-black ${accent.text} flex items-center gap-1`}>
-                  <Zap className="w-3 h-3" /> MOST POPULAR
-                </span>
-              </div>
-            )}
-          </div>
+              </motion.div>
+            </div>
           )
         })}
       </div>
