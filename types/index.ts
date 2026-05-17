@@ -2,24 +2,26 @@ export interface App {
   id: string
   name: string
   slug: string
+  icon_url: string
   version: string
   developer: string
-  description?: string
-  mod_feature?: string
-  mod_feature_full?: string
-  package_name?: string
-  size?: string
-  free_url?: string        // ← link biasa (ada timer)
-  direct_url?: string     // ← DIRECT LINK NON-VIP (baru)
-  vip_url?: string        // ← link VIP
-  category_id?: string
-  icon_url?: string
-  screenshots?: string[]
-  is_recommended?: boolean
+  mod_feature: string
+  mod_feature_full: string
+  description: string
+  package_name: string
+  size: string
+  upload_date: string
+  direct_url: string
+  free_url: string
+  vip_url: string
+  screenshots: string[]
+  category_id: string
   rating?: number
   download_count?: number
+  is_recommended?: boolean
   created_at?: string
 }
+
 
 export interface Category {
   id: string
