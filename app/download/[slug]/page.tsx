@@ -19,7 +19,7 @@ export default function DownloadPage() {
   const router = useRouter()
   const slug = params.slug as string
 
-  const [app, setApp] = useState<<App | null>(null)
+  const [app, setApp] = useState<App | null>(null)
   const [loading, setLoading] = useState(true)
   const [timer, setTimer] = useState(TIMER_SECONDS)
   const [canDownload, setCanDownload] = useState(false)
