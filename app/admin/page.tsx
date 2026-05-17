@@ -9,7 +9,7 @@ import {
   Image as ImageIcon, BarChart3, TrendingUp,
   Download, X, Star, Link as LinkIcon, Trash,
   CreditCard, Tag, AlertTriangle, GripVertical, Zap, Loader2, ChevronUp, ChevronDown,
-  Check, // <-- add this
+  Check, ExternalLink, Copy, // <-- add this
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { App, MembershipPlan } from "@/types"
@@ -273,6 +273,11 @@ function AppsTab() {
     setShowModal(false); setEditingApp(null); setFormData(emptyApp); setScreenshotUrl(""); fetchApps()
   }
 
+  const handleCopyUrl = (url: string, label: string) => {
+    navigator.clipboard.writeText(url)
+    toast.success(`${label} copied to clipboard!`)
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this app?")) return
     const { error } = await supabase.from("apps").delete().eq("id", id)
@@ -349,9 +354,11 @@ function AppsTab() {
                     </button>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button onClick={() => openEdit(app)} className="neo-button p-2 bg-neo-yellow text-neo-black"><Pencil className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(app.id)} className="neo-button p-2 bg-red-500 text-white"><Trash2 className="w-4 h-4" /></button>
+                    <div className="flex gap-2 flex-wrap">
+                      <button onClick={() => openEdit(app)} className="neo-button p-2 bg-neo-yellow text-neo-black" title="Edit"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => handleCopyUrl(`https://apkmonza.vercel.app/app/${app.slug}`, "App URL")} className="neo-button p-2 bg-neo-cyan text-white" title="Copy App URL"><LinkIcon className="w-4 h-4" /></button>
+                      <button onClick={() => handleCopyUrl(`https://apkmonza.vercel.app/download/${app.slug}`, "Download URL")} className="neo-button p-2 bg-neo-purple text-white" title="Copy Download URL"><ExternalLink className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(app.id)} className="neo-button p-2 bg-red-500 text-white" title="Delete"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -681,6 +688,11 @@ function CategoriesTab() {
     setShowModal(false); setEditingCat(null); setFormData({ name: "", slug: "", icon: "", color: "#06b6d4" }); fetchCategories()
   }
 
+  const handleCopyUrl = (url: string, label: string) => {
+    navigator.clipboard.writeText(url)
+    toast.success(`${label} copied to clipboard!`)
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this category?")) return
     const { error } = await supabase.from("categories").delete().eq("id", id)
@@ -747,6 +759,11 @@ function MembershipTab() {
     }
     setIsModalOpen(false)
     fetchPlans()
+  }
+
+  const handleCopyUrl = (url: string, label: string) => {
+    navigator.clipboard.writeText(url)
+    toast.success(`${label} copied to clipboard!`)
   }
 
   const handleDelete = async (id: string) => {
