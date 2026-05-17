@@ -299,7 +299,7 @@ export default function MembershipPage() {
           <span className="font-black text-neo-black dark:text-white text-sm md:text-base">Secure & Instant Activation</span>
         </div>
         <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 font-medium">
-          After payment confirmation via WhatsApp, your VIP access will be activated within 5 minutes.
+          After payment confirmation via WhatsApp, your VIP access will be activated within 10 minutes.
         </p>
       </motion.div>
     </main>
