@@ -57,10 +57,20 @@ export default function DownloadPage() {
         if (profile) {
           const vipActive = profile.is_vip && new Date(profile.vip_expires_at) > new Date()
           setIsVip(vipActive)
-          // If VIP, skip timer
-          if (vipActive) {
-            setCanDownload(true)
-            setTimer(0)
+
+          // VIP users: redirect to direct download immediately
+          if (vipActive && appData.vip_url) {
+            // Record download
+            await supabase.from("downloads").insert({
+              app_id: appData.id,
+              app_name: appData.name,
+              user_id: user.id,
+              is_vip: true,
+            })
+
+            // Redirect to direct download
+            window.location.href = appData.vip_url
+            return
           }
         }
       }
@@ -155,7 +165,7 @@ export default function DownloadPage() {
                 <img src={app.icon_url} alt={app.name} className="w-full h-full object-cover" />
               ) : (
                 <FileDown className="w-8 h-8 text-neo-cyan" />
-              )}
+              </Link>
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-black dark:text-white">{app.name}</h1>
@@ -176,32 +186,8 @@ export default function DownloadPage() {
           transition={{ delay: 0.1 }}
           className="neo-card bg-white dark:bg-neo-gray-dark p-6 border-3 border-neo-black"
         >
-          {isVip ? (
-            // VIP User - Direct Download
-            <div className="text-center space-y-4">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-neo-yellow/20 border-2 border-neo-black rounded-full">
-                <Crown className="w-5 h-5 text-neo-yellow" />
-                <span className="font-black text-sm">VIP ACCESS</span>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 font-medium">
-                Your VIP status grants instant download. No waiting!
-              </p>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={handleDownload}
-                disabled={downloading}
-                className="neo-button w-full py-4 bg-neo-cyan dark:bg-neo-purple text-white font-black text-lg flex items-center justify-center gap-3"
-              >
-                {downloading ? (
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                ) : (
-                  <Download className="w-6 h-6" />
-                )}
-                DOWNLOAD APK ({app.size})
-              </motion.button>
-            </div>
-          ) : (
-            // Non-VIP User - Timer
+          {/* This page is only for non-VIP users */}
+          <div className="text-center space-y-4">
             <div className="text-center space-y-4">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-neo-gray-dark border-2 border-neo-black rounded-full">
                 <Shield className="w-5 h-5 text-gray-500" />
@@ -277,8 +263,7 @@ export default function DownloadPage() {
               </motion.button>
 
               {/* Upgrade Banner */}
-              {!isVip && (
-                <Link
+              <Link
                   href="/membership"
                   className="block neo-card bg-neo-yellow/10 dark:bg-neo-yellow/5 border-2 border-neo-black p-4 hover:bg-neo-yellow/20 transition-colors"
                 >
@@ -297,7 +282,6 @@ export default function DownloadPage() {
                 </Link>
               )}
             </div>
-          )}
         </motion.div>
 
         {/* Safety Notice */}
@@ -324,4 +308,4 @@ export default function DownloadPage() {
     </main>
   )
       }
-                
+  
