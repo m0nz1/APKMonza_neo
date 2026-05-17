@@ -19,7 +19,7 @@ export default function DownloadPage() {
   const router = useRouter()
   const slug = params.slug as string
 
-  const [app, setApp] = useState<App | null>(null)
+  const [app, setApp] = useState<<App | null>(null)
   const [loading, setLoading] = useState(true)
   const [timer, setTimer] = useState(TIMER_SECONDS)
   const [canDownload, setCanDownload] = useState(false)
@@ -165,7 +165,7 @@ export default function DownloadPage() {
                 <img src={app.icon_url} alt={app.name} className="w-full h-full object-cover" />
               ) : (
                 <FileDown className="w-8 h-8 text-neo-cyan" />
-              </Link>
+              )}
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-black dark:text-white">{app.name}</h1>
@@ -264,24 +264,24 @@ export default function DownloadPage() {
 
               {/* Upgrade Banner */}
               <Link
-                  href="/membership"
-                  className="block neo-card bg-neo-yellow/10 dark:bg-neo-yellow/5 border-2 border-neo-black p-4 hover:bg-neo-yellow/20 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Crown className="w-8 h-8 text-neo-yellow flex-shrink-0" />
-                    <div className="text-left">
-                      <p className="font-bold text-sm text-neo-black dark:text-white">
-                        Tired of waiting?
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Upgrade to VIP for instant downloads, no ads, and premium support.
-                      </p>
-                    </div>
-                    <ArrowLeft className="w-5 h-5 rotate-180 text-neo-yellow flex-shrink-0" />
+                href="/membership"
+                className="block neo-card bg-neo-yellow/10 dark:bg-neo-yellow/5 border-2 border-neo-black p-4 hover:bg-neo-yellow/20 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Crown className="w-8 h-8 text-neo-yellow flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="font-bold text-sm text-neo-black dark:text-white">
+                      Tired of waiting?
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      Upgrade to VIP for instant downloads, no ads, and premium support.
+                    </p>
                   </div>
-                </Link>
-              )}
+                  <ArrowLeft className="w-5 h-5 rotate-180 text-neo-yellow flex-shrink-0" />
+                </div>
+              </Link>
             </div>
+          </div>
         </motion.div>
 
         {/* Safety Notice */}
@@ -307,5 +307,4 @@ export default function DownloadPage() {
       </div>
     </main>
   )
-      }
-  
+}
