@@ -46,8 +46,8 @@ export default async function HomePage() {
       <section>
         <h1 className="text-3xl md:text-4xl font-black mb-4">
           <span className="text-neo-cyan dark:text-neo-purple">Discover</span>{" "}
-          <span className="text-neo-yellow">Best APKs</span>{" "}
-          <span className="text-neo-black dark:text-white">& Games</span>
+          <span className="text-neo-yellow">Useful</span>{" "}
+          <span className="text-neo-black dark:text-white">APKs</span>
         </h1>
         <SearchBar />
       </section>
