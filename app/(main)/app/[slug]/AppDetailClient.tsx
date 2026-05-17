@@ -237,7 +237,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
     <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
     <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size || "N/A"} />
     <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name || "N/A"} />
-    <InfoItem icon={<Calendar className="w-5 h-5" />} label="Updated" value={formatDate(app.upload_date)} />
+<InfoItem icon={<Calendar className="w-5 h-5" />} label="Updated" value={formatDate(app.created_at)} />
   </div>
 </motion.div>
 
