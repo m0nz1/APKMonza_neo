@@ -222,24 +222,25 @@ export function AppDetailClient({ app, relatedApps }: Props) {
         <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{app.description}</p>
       </motion.div>
 
-      {/* 5. Tech Specs */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="mx-1 neo-card bg-white dark:bg-neo-gray-dark p-6"
-      >
-        <h2 className="text-xl font-black mb-4 flex items-center gap-2">
-          <Server className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
-          Tech Specs
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
-          <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size} />
-          <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name} />
-          <InfoItem icon={<Calendar className="w-5 h-5" />} label="Updated" value={formatDate(app.upload_date)} />
-        </div>
-      </motion.div>
+   {/* 5. Tech Specs */}
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.4 }}
+  className="mx-1 neo-card bg-white dark:bg-neo-gray-dark p-6"
+>
+  <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+    <Server className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
+    Tech Specs
+  </h2>
+  <div className="grid grid-cols-2 gap-3">
+    <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
+    <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size || "N/A"} />
+    <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name || "N/A"} />
+    <InfoItem icon={<Calendar className="w-5 h-5" />} label="Updated" value={formatDate(app.upload_date)} />
+  </div>
+</motion.div>
+
 
       {/* 6. Download Link */}
       <motion.div
