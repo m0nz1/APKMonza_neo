@@ -217,7 +217,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
       >
         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
           <Info className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
-          Description
+          More info
         </h2>
         <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{app.description}</p>
       </motion.div>
@@ -234,7 +234,7 @@ export function AppDetailClient({ app, relatedApps }: Props) {
     Tech Specs
   </h2>
 <div className="grid grid-cols-2 gap-3">
-  <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
+  <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={app.version} />
   <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size} />
   <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name} />
   <InfoItem icon={<Calendar className="w-5 h-5" />} label="Updated" value={formatDate(app.upload_date)} />
