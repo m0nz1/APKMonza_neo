@@ -233,12 +233,13 @@ export function AppDetailClient({ app, relatedApps }: Props) {
     <Server className="w-5 h-5 text-neo-cyan dark:text-neo-purple" />
     Tech Specs
   </h2>
-  <div className="grid grid-cols-2 gap-3">
-    <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
-    <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size || "N/A"} />
-    <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name || "N/A"} />
-<InfoItem icon={<Calendar className="w-5 h-5" />} label="Updated" value={formatDate(app.created_at || "")} />
-  </div>
+<div className="grid grid-cols-2 gap-3">
+  <InfoItem icon={<ChevronRight className="w-5 h-5" />} label="Version" value={`V${app.version}`} />
+  <InfoItem icon={<HardDrive className="w-5 h-5" />} label="Size" value={app.size} />
+  <InfoItem icon={<Package className="w-5 h-5" />} label="Package" value={app.package_name} />
+  <InfoItem icon={<Calendar className="w-5 h-5" />} label="Updated" value={formatDate(app.upload_date)} />
+</div>
+
 </motion.div>
 
 
