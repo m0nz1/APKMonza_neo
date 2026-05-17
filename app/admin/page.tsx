@@ -235,12 +235,12 @@ function AppsTab() {
   const supabase = createClient()
 
   const emptyApp: Partial<App> = {
-    name: "", slug: "", version: "", developer: "",
-    mod_feature: "", mod_feature_full: "", description: "",
-    package_name: "", size: "", free_url: "", vip_url: "",
-    category_id: "", icon_url: "", screenshots: [], is_recommended: false,
-    rating: 4.5, download_count: 0,
-  }
+  name: "", slug: "", version: "", developer: "",
+  mod_feature: "", mod_feature_full: "", description: "",
+  package_name: "", size: "", free_url: "", direct_url: "", vip_url: "",  // ← tambah direct_url
+  category_id: "", icon_url: "", screenshots: [], is_recommended: false,
+  rating: 4.5, download_count: 0,
+}
   const [formData, setFormData] = useState<Partial<App>>(emptyApp)
 
   useEffect(() => { fetchApps(); fetchCategories() }, [])
@@ -421,7 +421,8 @@ function AppsTab() {
               <div><label className="block font-bold text-sm mb-1">Description</label><textarea value={formData.description || ""} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} className="neo-input w-full px-3 py-2" placeholder="App description..." /></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block font-bold text-sm mb-1">Free Download URL</label><input value={formData.free_url || ""} onChange={(e) => setFormData({ ...formData, free_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
-                <div><label className="block font-bold text-sm mb-1">VIP Download URL</label><input value={formData.vip_url || ""} onChange={(e) => setFormData({ ...formData, vip_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
+<div><label className="block font-bold text-sm mb-1">Direct Link Non-VIP</label><input value={formData.direct_url || ""} onChange={(e) => setFormData({ ...formData, direct_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
+<div><label className="block font-bold text-sm mb-1">VIP Download URL</label><input value={formData.vip_url || ""} onChange={(e) => setFormData({ ...formData, vip_url: e.target.value })} className="neo-input w-full px-3 py-2" placeholder="https://..." /></div>
               </div>
               <div className="flex items-center gap-3 p-3 border-2 border-neo-black rounded-lg bg-neo-gray-light dark:bg-neo-gray-dark">
                 <input type="checkbox" id="is_recommended" checked={formData.is_recommended || false} onChange={(e) => setFormData({ ...formData, is_recommended: e.target.checked })} className="w-5 h-5 border-2 border-neo-black rounded cursor-pointer" />

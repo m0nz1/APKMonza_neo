@@ -100,7 +100,7 @@ export default function DownloadPage() {
   }, [isVip, canDownload, loading, app])
 
   const handleDownload = async () => {
-    if (!app?.free_url) {
+    if (!app?.direct_url) {
       toast.error("Download link not available")
       return
     }
@@ -118,7 +118,7 @@ export default function DownloadPage() {
 
     // Trigger file download
     const link = document.createElement("a")
-    link.href = app.free_url
+    link.href = app.direct_url
     link.download = `${app.slug}.apk`
     link.target = "_blank"
     document.body.appendChild(link)
